@@ -1,103 +1,165 @@
-import Image from "next/image";
+'use client';
+import React from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight, ChartBar, Calculator, Wallet, PiggyBank } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
+  const features = [
+    {
+      src: "/investment1.svg",
+      title: "Track Investments",
+      icon: <ChartBar className="w-12 h-12" />
+    },
+    {
+      src: "/investment2.svg",
+      title: "Smart Analytics",
+      icon: <Calculator className="w-12 h-12" />
+    },
+    {
+      src: "/investment3.svg",
+      title: "Portfolio Management",
+      icon: <Wallet className="w-12 h-12" />
+    },
+    {
+      src: "/investment4.svg",
+      title: "Wealth Growth",
+      icon: <PiggyBank className="w-12 h-12" />
+    },
+  ];
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="relative z-10 min-h-screen bg-[#fefee3]">
+      {/* Navigation Breadcrumb */}
+      <motion.div
+        className="flex items-center justify-center pt-12 pb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex items-center space-x-3 text-sm text-[#4c956c]">
+          <Wallet className="w-4 h-4 text-[#2c6e49]" />
+          <span>→</span>
+          <ChartBar className="w-4 h-4" />
+          <span className="text-[#2c6e49]">Smart-Investing</span>
+          <span>→</span>
+          <Calculator className="w-4 h-4" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </motion.div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Headline */}
+        <motion.div
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <h1 className="mb-6 text-[#2c6e49]" style={{
+            fontSize: "clamp(2.0rem, 7vw, 4.0rem)",
+            lineHeight: "1.0",
+            letterSpacing: "-0.01em",
+            fontWeight: "600"
+          }}>
+            Smart Investment Tracking,
+            <br />
+            <span className="text-[#d68c45]">
+              Powered by AI!
+            </span>
+          </h1>
+
+          <motion.p
+            className="mx-auto mb-8 text-[#4c956c]"
+            style={{
+              fontSize: "1.125rem",
+              lineHeight: "1.6",
+              maxWidth: "600px",
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            Track all your investments in one place with AI-powered insights.
+            Make smarter decisions and grow your wealth with FinSync.
+          </motion.p>
+        </motion.div>
+
+        {/* CTA Button */}
+        <motion.div
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <Link href="/signup">
+            <motion.button
+              className="inline-flex items-center text-white px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl bg-[#2c6e49]"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span>Start Tracking</span>
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </motion.button>
+          </Link>
+        </motion.div>
+
+        {/* Features Grid */}
+        <motion.div
+          className="relative mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.1 }}
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <div className="hidden lg:grid lg:grid-cols-4 gap-12 items-center justify-center">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="text-center group cursor-pointer"
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 1.3 + index * 0.15 }}
+                whileHover={{
+                  scale: 1.1,
+                  y: -10,
+                  transition: { duration: 0.3 }
+                }}
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="relative p-4 bg-[#ffc9b9] rounded-2xl">
+                    {feature.icon}
+                  </div>
+                </div>
+                <h3 className="text-[#2c6e49] font-medium">
+                  {feature.title}
+                </h3>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Mobile Features Grid */}
+          <div className="lg:hidden grid grid-cols-2 gap-8 max-w-md mx-auto">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="text-center group cursor-pointer"
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 1.3 + index * 0.15 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className="mb-3 flex justify-center">
+                  <div className="p-3 bg-[#ffc9b9] rounded-xl">
+                    {feature.icon}
+                  </div>
+                </div>
+                <h3 className="text-[#2c6e49] text-sm font-medium">
+                  {feature.title}
+                </h3>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </main>
   );
 }
