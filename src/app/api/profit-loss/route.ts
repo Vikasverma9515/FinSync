@@ -1,4 +1,3 @@
-import { getStockQuote } from '@/lib/stocks'
 import { NextRequest, NextResponse } from 'next/server'
 import { getFriendAPICredentials, updateSessionCookies } from '@/lib/friend-api-session'
 import * as jose from 'jose'
@@ -6,16 +5,6 @@ import * as jose from 'jose'
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key-change-in-production')
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const symbol = searchParams.get('symbol')
-
-  if (!symbol) {
-    return NextResponse.json(
-      { error: 'Symbol is required' },
-      { status: 400 }
-    )
-  }
-
   try {
     const authHeader = request.headers.get('authorization')
     let credentials = null
@@ -28,13 +17,13 @@ export async function GET(request: NextRequest) {
         const decoded = await jose.jwtVerify(token, secret)
         userId = decoded.payload.userId as string
         if (credentials) {
-          console.log(`Stock quote request with credentials for ${symbol}`)
+          console.log('Profit/Loss request with credentials')
         }
       } catch (error) {
         console.error('Failed to get credentials:', error)
       }
     } else {
-      console.warn(`Stock quote request WITHOUT auth token for ${symbol}`)
+      console.warn('Profit/Loss request WITHOUT auth token')
     }
 
     if (credentials) {
@@ -58,8 +47,8 @@ export async function GET(request: NextRequest) {
           if (setCookie && userId) {
             await updateSessionCookies(userId, setCookie)
           }
-          
-          console.log(`Re-authenticated with Friend API for ${symbol}`)
+
+          console.log('Re-authenticated with Friend API for profit/loss')
           
           const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -69,7 +58,7 @@ export async function GET(request: NextRequest) {
           }
           
           const response = await fetch(
-            `https://finance-portfolio-management-apis.onrender.com/api/output/stocks/${symbol}`,
+            'https://finance-portfolio-management-apis.onrender.com/api/output/calculateProfitOrLoss',
             {
               method: 'GET',
               headers,
@@ -78,63 +67,52 @@ export async function GET(request: NextRequest) {
           
           if (response.ok) {
             const data = await response.json()
-            console.log(`Friend API stock response for ${symbol}:`, data)
+            console.log('Friend API profit/loss response:', data)
             
-            const mappedData = {
-              symbol: symbol.toUpperCase(),
-              name: data.companyName || data.name || symbol,
-              price: parseFloat(String(data.currentPrice || data.price || 0)),
-              change: parseFloat(String(data.change || 0)),
-              changePercent: parseFloat(String(data.changePercent || data.percentageChange || 0)),
-              timestamp: new Date().toISOString(),
+            const formattedData = {
+              totalProfit: data.totalProfit || data.totalPnL || data.pnl || 0,
+              percentage: data.percentage || data.percentagePnL || data.pnlPercentage || 0,
+              rawData: data,
             }
             
-            console.log(`Mapped stock data for ${symbol}:`, mappedData)
-            return NextResponse.json(mappedData)
+            return NextResponse.json(formattedData)
           }
         }
       } catch (error) {
-        console.error(`Error fetching stock ${symbol} with auth:`, error)
+        console.error('Error fetching profit/loss with auth:', error)
       }
     }
 
-    const response = await fetch(
-      `https://finance-portfolio-management-apis.onrender.com/api/output/stocks/${symbol}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    const response = await fetch('https://finance-portfolio-management-apis.onrender.com/api/output/calculateProfitOrLoss', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`Failed to fetch stock ${symbol}: ${response.status}`, errorText)
+      console.error(`Failed to fetch profit/loss: ${response.status}`, errorText)
       return NextResponse.json(
-        { error: 'Failed to fetch quote', details: errorText },
+        { error: 'Failed to fetch profit/loss', details: errorText },
         { status: response.status }
       )
     }
 
     const data = await response.json()
-    console.log(`Friend API stock response for ${symbol}:`, data)
-
-    const mappedData = {
-      symbol: symbol.toUpperCase(),
-      name: data.companyName || data.name || symbol,
-      price: parseFloat(String(data.currentPrice || data.price || 0)),
-      change: parseFloat(String(data.change || 0)),
-      changePercent: parseFloat(String(data.changePercent || data.percentageChange || 0)),
-      timestamp: new Date().toISOString(),
+    console.log('Friend API profit/loss response:', data)
+    
+    const formattedData = {
+      totalProfit: data.totalProfit || data.totalPnL || data.pnl || 0,
+      percentage: data.percentage || data.percentagePnL || data.pnlPercentage || 0,
+      rawData: data,
     }
     
-    console.log(`Mapped stock data for ${symbol}:`, mappedData)
-    return NextResponse.json(mappedData)
+    return NextResponse.json(formattedData)
   } catch (error) {
-    console.error(`Error fetching quote for ${symbol}:`, error)
+    console.error('Error fetching profit/loss:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch quote' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

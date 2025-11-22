@@ -1,27 +1,38 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
 
 export default function ProfileSetupPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
   const [step, setStep] = useState(1)
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
   const [formData, setFormData] = useState({
     age: '',
-    riskTolerance: 'medium' as 'low' | 'medium' | 'high',
-    investmentGoal: '',
-    monthlyInvestment: '',
-    initialCapital: '',
+    riskScore: '5',
+    investmentHorizon: '',
+    financialGoal: '1',
+    financialCondition: '1',
+    annualIncome: '',
+    totalNetWorth: '',
+    dependents: '0',
+    investmentKnowledge: '1',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -40,14 +51,12 @@ export default function ProfileSetupPage() {
     setError('')
 
     try {
-      const supabase = createClient()
-      
-      const { data: { user } } = await supabase.auth.getUser()
-      
       if (!user) {
         setError('User not found')
         return
       }
+
+      const supabase = createClient()
 
       const { error: updateError } = await supabase
         .from('user_profiles')
@@ -55,10 +64,14 @@ export default function ProfileSetupPage() {
           id: user.id,
           email: user.email,
           age: parseInt(formData.age),
-          risk_tolerance: formData.riskTolerance,
-          investment_goal: formData.investmentGoal,
-          monthly_investment: parseFloat(formData.monthlyInvestment),
-          initial_capital: parseFloat(formData.initialCapital),
+          risk_score: parseInt(formData.riskScore),
+          investment_horizon: parseInt(formData.investmentHorizon),
+          financial_goal: parseInt(formData.financialGoal),
+          financial_condition: parseInt(formData.financialCondition),
+          annual_income: parseFloat(formData.annualIncome),
+          total_net_worth: parseFloat(formData.totalNetWorth),
+          dependents: parseInt(formData.dependents),
+          investment_knowledge: parseInt(formData.investmentKnowledge),
           updated_at: new Date().toISOString(),
         })
 
@@ -74,200 +87,279 @@ export default function ProfileSetupPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:30px_30px]" />
-      
-      <div className="relative z-10 w-full max-w-2xl">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
         >
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="bg-gradient-to-r from-emerald-400 to-teal-500 p-3 rounded-xl">
-              <TrendingUp className="w-8 h-8 text-white" />
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="bg-blue-600 p-2.5 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <span className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold text-gray-900">
               FinSync
             </span>
           </div>
-          <p className="text-slate-400">Set up your investment profile</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+          <p className="text-gray-600">Help us personalize your investment journey</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
         >
-          <Card>
-            <div className="mb-8">
-              <div className="flex justify-between mb-4">
-                {[1, 2, 3].map(num => (
-                  <div key={num} className="flex flex-col items-center flex-1">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
+          <div className="mb-10">
+            <div className="flex items-center justify-between">
+              {[1, 2, 3].map((num, idx) => (
+                <div key={num} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-all ${
                       num <= step 
-                        ? 'bg-emerald-600 text-white' 
-                        : 'bg-slate-700 text-slate-400'
+                        ? 'bg-blue-600 text-white' 
+                        : num < step
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-100 text-gray-400'
                     }`}>
-                      {num}
+                      {num < step ? <CheckCircle2 className="w-6 h-6" /> : num}
                     </div>
-                    <p className="text-xs text-slate-400 mt-2">
-                      {num === 1 ? 'Personal' : num === 2 ? 'Risk Profile' : 'Capital'}
+                    <p className={`text-xs mt-2 font-medium ${
+                      num <= step ? 'text-gray-900' : 'text-gray-400'
+                    }`}>
+                      {num === 1 ? 'Personal' : num === 2 ? 'Financial' : 'Investment'}
                     </p>
                   </div>
-                ))}
-              </div>
+                  {idx < 2 && (
+                    <div className={`flex-1 h-1 mx-3 rounded-full ${
+                      num < step ? 'bg-green-500' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </div>
+              ))}
             </div>
+          </div>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                {error}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {step === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    What's your age?
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleChange}
+                    required
+                    min="18"
+                    max="100"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 32"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    How many dependents do you have?
+                  </label>
+                  <input
+                    type="number"
+                    name="dependents"
+                    value={formData.dependents}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 3"
+                  />
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {step === 1 && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      What's your age?
-                    </label>
-                    <input
-                      type="number"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleChange}
-                      required
-                      min="18"
-                      max="100"
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none transition-colors"
-                      placeholder="e.g., 30"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      What's your investment goal?
-                    </label>
-                    <textarea
-                      name="investmentGoal"
-                      value={formData.investmentGoal}
-                      onChange={handleChange}
-                      required
-                      rows={3}
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none transition-colors resize-none"
-                      placeholder="e.g., Long-term wealth creation, Early retirement, Education fund"
-                    />
-                  </div>
+            {step === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Annual Income (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="annualIncome"
+                    value={formData.annualIncome}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="100000"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 2000000"
+                  />
                 </div>
-              )}
 
-              {step === 2 && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-4">
-                      What's your risk tolerance?
-                    </label>
-                    <div className="space-y-3">
-                      {[
-                        { value: 'low', label: 'Low Risk - Prefer stable investments', desc: 'Focus on bonds and dividend stocks' },
-                        { value: 'medium', label: 'Medium Risk - Balanced approach', desc: 'Mix of stocks, bonds, and diversified assets' },
-                        { value: 'high', label: 'High Risk - Aggressive growth', desc: 'Growth stocks and emerging opportunities' }
-                      ].map(option => (
-                        <label key={option.value} className="flex items-center p-4 border border-slate-600 rounded-xl cursor-pointer hover:border-emerald-500 transition-colors" style={{
-                          backgroundColor: formData.riskTolerance === option.value ? 'rgba(16, 185, 129, 0.1)' : ''
-                        }}>
-                          <input
-                            type="radio"
-                            name="riskTolerance"
-                            value={option.value}
-                            checked={formData.riskTolerance === option.value}
-                            onChange={handleChange}
-                            className="w-4 h-4 text-emerald-600"
-                          />
-                          <div className="ml-4">
-                            <p className="text-white font-medium">{option.label}</p>
-                            <p className="text-sm text-slate-400">{option.desc}</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Total Net Worth (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="totalNetWorth"
+                    value={formData.totalNetWorth}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="100000"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 10000000"
+                  />
                 </div>
-              )}
 
-              {step === 3 && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Initial Capital (₹)
-                    </label>
-                    <input
-                      type="number"
-                      name="initialCapital"
-                      value={formData.initialCapital}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      step="1000"
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none transition-colors"
-                      placeholder="e.g., 100000"
-                    />
-                    <p className="text-xs text-slate-400 mt-1">Starting amount you want to invest</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Monthly Investment (₹)
-                    </label>
-                    <input
-                      type="number"
-                      name="monthlyInvestment"
-                      value={formData.monthlyInvestment}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      step="1000"
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none transition-colors"
-                      placeholder="e.g., 10000"
-                    />
-                    <p className="text-xs text-slate-400 mt-1">How much you want to invest each month</p>
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Risk Score (0-10)
+                  </label>
+                  <input
+                    type="number"
+                    name="riskScore"
+                    value={formData.riskScore}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    max="10"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 7"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">0 = Conservative, 10 = Aggressive</p>
                 </div>
-              )}
 
-              <div className="flex gap-4 pt-4">
-                {step > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep(step - 1)}
-                    className="flex-1"
-                  >
-                    Back
-                  </Button>
-                )}
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Setting up...</span>
-                    </div>
-                  ) : step === 3 ? (
-                    'Complete Setup'
-                  ) : (
-                    'Next'
-                  )}
-                </Button>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Investment Horizon (years)
+                  </label>
+                  <input
+                    type="number"
+                    name="investmentHorizon"
+                    value={formData.investmentHorizon}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    placeholder="e.g., 20"
+                  />
+                </div>
               </div>
-            </form>
-          </Card>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Investment Knowledge
+                  </label>
+                  <select
+                    name="investmentKnowledge"
+                    value={formData.investmentKnowledge}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="1">1 - Beginner</option>
+                    <option value="2">2 - Basic</option>
+                    <option value="3">3 - Intermediate</option>
+                    <option value="4">4 - Advanced</option>
+                    <option value="5">5 - Expert</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Financial Goal
+                  </label>
+                  <select
+                    name="financialGoal"
+                    value={formData.financialGoal}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="1">1 - Capital Preservation</option>
+                    <option value="2">2 - Steady Growth</option>
+                    <option value="3">3 - Moderate Growth</option>
+                    <option value="4">4 - Aggressive Growth</option>
+                    <option value="5">5 - Maximum Growth</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    Financial Condition
+                  </label>
+                  <select
+                    name="financialCondition"
+                    value={formData.financialCondition}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="1">1 - Struggling</option>
+                    <option value="2">2 - Stable</option>
+                    <option value="3">3 - Comfortable</option>
+                    <option value="4">4 - Affluent</option>
+                    <option value="5">5 - Very Wealthy</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+          <div className="flex gap-3 pt-8 border-t border-gray-200">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-75 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Setting up...</span>
+                </>
+              ) : step === 3 ? (
+                'Complete Profile'
+              ) : (
+                'Next'
+              )}
+            </button>
+          </div>
+          </form>
         </motion.div>
       </div>
     </div>

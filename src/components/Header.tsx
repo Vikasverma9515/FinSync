@@ -41,30 +41,39 @@ interface PlanItem {
   comingSoon?: boolean
 }
 
-const NAVIGATION_LINKS: NavigationLink[] = [
-  {
-    label: "Products",
-    submenu: true,
-    items: [
+const getNavigationLinks = (user: any): NavigationLink[] => {
+  if (user) {
+    // Logged in user navigation
+    return [
+      { label: "Dashboard", action: "dashboard" },
+      { label: "All Changes", action: "changes" },
+    ]
+  } else {
+    // Guest user navigation
+    return [
       {
-        planId: "savings",
-        label: "High-Yield Savings",
-        description: "Earn 100% RBI repo rate on your savings",
-        icon: "TrendingUp",
-        comingSoon: false,
+        label: "Products",
+        submenu: true,
+        items: [
+          {
+            planId: "savings",
+            label: "High-Yield Savings",
+            description: "Earn 100% RBI repo rate on your savings",
+            icon: "TrendingUp",
+            comingSoon: false,
+          },
+          {
+            planId: "deposits",
+            label: "Fixed Deposits",
+            description: "Up to 7.75% interest with instant booking",
+            icon: "Sparkles",
+            comingSoon: false,
+          },
+        ],
       },
-      {
-        planId: "deposits",
-        label: "Fixed Deposits",
-        description: "Up to 7.75% interest with instant booking",
-        icon: "Sparkles",
-        comingSoon: false,
-      },
-    ],
-  },
-  { label: "Dashboard", action: "dashboard" },
-  { label: "Accounts", action: "accounts" },
-]
+    ]
+  }
+}
 
 const ICON_MAP = {
   TrendingUp: { component: TrendingUp, color: "#10B981" },
@@ -161,8 +170,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
       case "dashboard":
         router.push('/dashboard')
         break
-      case "accounts":
-        router.push('/dashboard') // Could be separate accounts page
+      case "changes":
+        router.push('/dashboard/changes')
         break
       default:
         break
@@ -226,7 +235,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               role="navigation"
               aria-label="Main navigation"
             >
-              {NAVIGATION_LINKS.map((link) => (
+              {getNavigationLinks(user).map((link) => (
                 <div
                   key={link.label}
                   className="relative"
@@ -507,7 +516,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                {NAVIGATION_LINKS.map((link, linkIndex) => (
+                {getNavigationLinks(user).map((link, linkIndex) => (
                   <motion.div
                     key={link.label}
                     initial={{ opacity: 0, x: -20 }}

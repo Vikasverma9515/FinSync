@@ -1,22 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
-import { finSyncAI } from '@/lib/ai'
+import { getFriendAPICredentials, updateSessionCookies } from '@/lib/friend-api-session'
+import * as jose from 'jose'
 
-export async function POST(request: NextRequest) {
+const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key-change-in-production')
+
+export async function GET(request: NextRequest) {
   try {
-    const { symbol, currentPrice, timeframe } = await request.json()
+    const { searchParams } = new URL(request.url)
+    const symbol = searchParams.get('symbol')
 
-    if (!symbol || !currentPrice) {
-      return NextResponse.json({ error: 'Symbol and current price are required' }, { status: 400 })
+    if (!symbol) {
+      return NextResponse.json(
+        { error: 'Symbol is required' },
+        { status: 400 }
+      )
     }
 
-    const prediction = await finSyncAI.predictStockPrice(symbol, currentPrice, timeframe)
+    const authHeader = request.headers.get('authorization')
+    let credentials = null
+    let userId = null
+    
+    if (authHeader) {
+      try {
+        const token = authHeader.replace('Bearer ', '')
+        credentials = await getFriendAPICredentials(token)
+        const decoded = await jose.jwtVerify(token, secret)
+        userId = decoded.payload.userId as string
+        if (credentials) {
+          console.log(`Predict request with credentials for ${symbol}`)
+        }
+      } catch (error) {
+        console.error('Failed to get credentials:', error)
+      }
+    } else {
+      console.warn(`Predict request WITHOUT auth token for ${symbol}`)
+    }
 
-    return NextResponse.json({ prediction })
+    if (credentials) {
+      try {
+        const loginResponse = await fetch(
+          'https://finance-portfolio-management-apis.onrender.com/api/input/login',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          }
+        )
+
+        if (loginResponse.ok) {
+          const setCookie = loginResponse.headers.get('set-cookie')
+          if (setCookie && userId) {
+            await updateSessionCookies(userId, setCookie)
+          }
+          
+          console.log(`Re-authenticated with Friend API for predict ${symbol}`)
+          
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+          }
+          if (credentials.cookies) {
+            headers['Cookie'] = credentials.cookies
+          }
+          
+          const response = await fetch(
+            `https://finance-portfolio-management-apis.onrender.com/api/output/predict?symbol=${symbol}`,
+            {
+              method: 'GET',
+              headers,
+            }
+          )
+          
+          if (response.ok) {
+            const data = await response.json()
+            console.log(`Friend API predict response for ${symbol}:`, data)
+            return NextResponse.json(data)
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching prediction ${symbol} with auth:`, error)
+      }
+    }
+
+    const response = await fetch(
+      `https://finance-portfolio-management-apis.onrender.com/api/output/predict?symbol=${symbol}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to fetch prediction for ${symbol}: ${response.status}`, errorText)
+      return NextResponse.json(
+        { error: 'Failed to fetch prediction', details: errorText },
+        { status: response.status }
+      )
+    }
+
+    const data = await response.json()
+    console.log(`Friend API predict response for ${symbol}:`, data)
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('AI Predict API error:', error)
+    console.error('Error fetching prediction:', error)
     return NextResponse.json(
-      { error: 'Failed to generate prediction' },
+      { error: 'Failed to fetch prediction' },
       { status: 500 }
     )
   }

@@ -12,19 +12,19 @@ export interface StockQuote {
 export async function getStockQuote(symbol: string): Promise<StockQuote | null> {
   try {
     const response = await fetch(
-      `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+      `https://finance-portfolio-management-apis.onrender.com/api/output/stocks/${symbol}`
     )
-    
+
     if (!response.ok) return null
 
     const data = await response.json()
-    
+
     return {
       symbol: symbol.toUpperCase(),
-      name: symbol,
-      price: data.c || 0,
-      change: data.d || 0,
-      changePercent: data.dp || 0,
+      name: data.name || symbol,
+      price: data.price || 0,
+      change: data.change || 0,
+      changePercent: data.changePercent || 0,
       timestamp: new Date().toISOString(),
     }
   } catch (error) {

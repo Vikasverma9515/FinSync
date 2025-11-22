@@ -10,10 +10,14 @@ CREATE TABLE user_profiles (
   email TEXT NOT NULL,
   full_name TEXT,
   age INTEGER CHECK (age >= 18 AND age <= 100),
-  risk_tolerance TEXT CHECK (risk_tolerance IN ('low', 'medium', 'high')),
-  investment_goal TEXT,
-  monthly_investment DECIMAL(15,2) CHECK (monthly_investment >= 0),
-  initial_capital DECIMAL(15,2) CHECK (initial_capital >= 0),
+  risk_score INTEGER CHECK (risk_score >= 0 AND risk_score <= 10),
+  investment_horizon INTEGER CHECK (investment_horizon >= 0),
+  financial_goal INTEGER CHECK (financial_goal >= 1 AND financial_goal <= 5),
+  financial_condition INTEGER CHECK (financial_condition >= 1 AND financial_condition <= 5),
+  annual_income DECIMAL(15,2) CHECK (annual_income >= 0),
+  total_net_worth DECIMAL(15,2) CHECK (total_net_worth >= 0),
+  dependents INTEGER CHECK (dependents >= 0),
+  investment_knowledge INTEGER CHECK (investment_knowledge >= 1 AND investment_knowledge <= 5),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
