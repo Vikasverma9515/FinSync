@@ -6,16 +6,14 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  TrendingUp, TrendingDown, DollarSign, Plus, LogOut, RefreshCw, BarChart3
+  TrendingUp, TrendingDown, DollarSign, Search, BarChart3
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 import { StockSearchDialog } from '@/components/StockSearchDialog'
-import { BuyStockDialog } from '@/components/BuyStockDialog'
-import { SellStockDialog } from '@/components/SellStockDialog'
-import { getPopularStocks, getStockQuote } from '@/lib/stocks'
+import { getPopularStocks, getStockQuote, getPredictData } from '@/lib/stocks'
 import type { UserProfile, Portfolio } from '@/types'
-import type { StockQuote } from '@/lib/stocks'
+import type { StockQuote, PredictResponse } from '@/lib/stocks'
 import Header from '@/components/Header'
 
 export default function Dashboard() {
@@ -24,15 +22,13 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [holdings, setHoldings] = useState<(Portfolio & { quote?: StockQuote })[]>([])
   const [showSearch, setShowSearch] = useState(false)
-  const [selectedStock, setSelectedStock] = useState<{ symbol: string; name: string; price: number } | null>(null)
-  const [sellStock, setSellStock] = useState<Portfolio | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
 
   const [marketStocks, setMarketStocks] = useState<StockQuote[]>([])
   const [customStocks, setCustomStocks] = useState<StockQuote[]>([])
   const [profitLoss, setProfitLoss] = useState<any>(null)
   const [authToken, setAuthToken] = useState<string>('')
+  const [predictData, setPredictData] = useState<PredictResponse | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -306,53 +302,50 @@ export default function Dashboard() {
         }
       }
 
+      const loadPredictData = async (token: string) => {
+        try {
+          console.log('Loading predict data...')
+          if (!profile) {
+            console.warn('Profile not available for predict data')
+            return
+          }
+
+          const userProfileData = {
+            Age: profile.age,
+            RiskScore: profile.risk_score,
+            InvestmentHorizon: profile.investment_horizon,
+            FinancialGoal: profile.financial_goal,
+            FinancialCondition: profile.financial_condition,
+            AnnualIncome: profile.annual_income,
+            TotalNetWorth: profile.total_net_worth,
+            Dependents: profile.dependents,
+            InvestmentKnowledge: profile.investment_knowledge
+          }
+
+          const data = await getPredictData(userProfileData, token)
+          if (data) {
+            console.log('Predict data:', data)
+            setPredictData(data)
+          }
+        } catch (error) {
+          console.error('Failed to load predict data:', error)
+        }
+      }
+
       await loadMarketStocks(authToken)
       await loadCustomStocks(authToken)
       await loadProfitLoss(authToken)
+      await loadPredictData(authToken)
       setIsLoading(false)
     }
 
     loadAuthenticatedData()
-  }, [authToken, holdings])
+  }, [authToken, holdings, profile])
 
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
-  }
-
-  const handleBuyStock = (symbol: string, name: string) => {
-    setSelectedStock({ symbol, name, price: 0 })
-    fetchStockPrice(symbol).then(price => {
-      setSelectedStock({ symbol, name, price })
-    })
-  }
-
-  const fetchStockPrice = async (symbol: string): Promise<number> => {
-    try {
-      const response = await fetch(`/api/stocks/quote?symbol=${symbol}`)
-      const data = await response.json()
-      return data.price || 0
-    } catch {
-      return 0
-    }
-  }
-
-  const refreshPrices = async () => {
-    setRefreshing(true)
-    try {
-      const updated = await Promise.all(
-        holdings.map(async (holding) => {
-          const price = await fetchStockPrice(holding.symbol)
-          return { ...holding, currentPrice: price }
-        })
-      )
-      setHoldings(updated)
-    } catch (error) {
-      console.error('Error refreshing prices:', error)
-    } finally {
-      setRefreshing(false)
-    }
   }
 
   const totalPortfolioValue = holdings.reduce(
@@ -403,7 +396,7 @@ export default function Dashboard() {
                 Portfolio Overview
               </h2>
               <p className="text-slate-600">
-                {profile?.risk_tolerance} risk • {profile?.age} years old
+                Risk Score: {profile?.risk_score} • {profile?.age} years old
               </p>
             </div>
           </div>
@@ -448,6 +441,13 @@ export default function Dashboard() {
               <BarChart3 className="w-5 h-5 mr-2 text-slate-900" />
               Popular Stocks
             </h3>
+            <Button
+              onClick={() => setShowSearch(true)}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              Search Stock
+            </Button>
           </div>
 
           <Card className="bg-white border-slate-200 shadow-sm">
@@ -464,13 +464,6 @@ export default function Dashboard() {
                       {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleBuyStock(stock.symbol, stock.name)}
-                    className="ml-2 bg-slate-900 hover:bg-slate-800"
-                  >
-                    Buy
-                  </Button>
                 </div>
               ))}
             </div>
@@ -511,21 +504,43 @@ export default function Dashboard() {
 
             {/* Profit/Loss */}
             <Card className="bg-white border-slate-200 shadow-sm">
-              <h4 className="text-lg font-semibold text-slate-900 mb-4">Profit/Loss Summary</h4>
+              <h4 className="text-lg font-semibold text-slate-900 mb-4">Profit/Loss by Stock</h4>
               {profitLoss ? (
                 <div className="space-y-3">
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <p className="text-slate-600 text-sm">Total Profit/Loss</p>
-                    <p className={`text-lg font-bold ${profitLoss.totalProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      ₹{profitLoss.totalProfit?.toFixed(2) || '0.00'}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <p className="text-slate-600 text-sm">Percentage</p>
-                    <p className={`text-lg font-bold ${profitLoss.percentage >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {profitLoss.percentage?.toFixed(2) || '0.00'}%
-                    </p>
-                  </div>
+                  {profitLoss.rawData && profitLoss.rawData.data && Array.isArray(profitLoss.rawData.data) ? (
+                    <>
+                      {profitLoss.rawData.data.map((stock: any) => {
+                        const totalInvested = holdings.find(h => h.symbol === stock.symbol)
+                          ? holdings.find(h => h.symbol === stock.symbol)!.quantity * holdings.find(h => h.symbol === stock.symbol)!.average_price
+                          : 0
+                        const profitPercent = totalInvested > 0 ? (stock.profit / totalInvested) * 100 : 0
+                        return (
+                          <div key={stock.symbol} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-slate-900 font-medium">{stock.symbol}</p>
+                              <p className={`text-sm font-bold ${stock.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                {stock.profit >= 0 ? '+' : ''}₹{stock.profit.toFixed(2)}
+                              </p>
+                            </div>
+                            <p className={`text-xs ${profitPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {profitPercent >= 0 ? '+' : ''}{profitPercent.toFixed(2)}%
+                            </p>
+                          </div>
+                        )
+                      })}
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 mt-4">
+                        <p className="text-slate-600 text-sm font-medium">Total Profit/Loss</p>
+                        <p className={`text-lg font-bold ${profitLoss.totalProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {profitLoss.totalProfit >= 0 ? '+' : ''}₹{profitLoss.totalProfit.toFixed(2)}
+                        </p>
+                        <p className={`text-xs mt-1 ${profitLoss.percentage >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {profitLoss.percentage >= 0 ? '+' : ''}{profitLoss.percentage.toFixed(2)}%
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-slate-600 text-sm">No profit/loss data available</div>
+                  )}
                 </div>
               ) : (
                 <div className="text-slate-600 text-sm">Loading profit/loss data...</div>
@@ -534,43 +549,89 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
+        {/* AI Strategy & Recommendations */}
+        {predictData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900">AI-Powered Investment Strategy</h3>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* AI Strategy Allocation */}
+              <Card className="bg-white border-slate-200 shadow-sm">
+                <h4 className="text-lg font-semibold text-slate-900 mb-4">Asset Allocation</h4>
+                <div className="space-y-3">
+                  {Object.entries(predictData.ai_strategy).map(([asset, allocation]) => (
+                    <div key={asset} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                      <p className="text-slate-900 font-medium">{asset}</p>
+                      <p className="text-slate-900 font-semibold">{(allocation * 100).toFixed(2)}%</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Final Recommendations */}
+              <Card className="bg-white border-slate-200 shadow-sm">
+                <h4 className="text-lg font-semibold text-slate-900 mb-4">Recommendations</h4>
+                <div className="space-y-3">
+                  {predictData.final_recommendation.map((rec, index) => (
+                    <div key={index} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-slate-900 font-medium">{rec.Asset}</p>
+                        <p className="text-slate-900 font-semibold text-sm">{(rec.Allocation * 100).toFixed(2)}%</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {rec.Tickers.map((ticker) => (
+                          <span key={ticker} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {ticker}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            {/* User Profile Summary */}
+            <Card className="bg-white border-slate-200 shadow-sm mt-6">
+              <h4 className="text-lg font-semibold text-slate-900 mb-4">Your Profile</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-slate-600 text-xs font-medium">Age</p>
+                  <p className="text-slate-900 font-semibold text-lg">{predictData.user_profile.Age}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-slate-600 text-xs font-medium">Risk Score</p>
+                  <p className="text-slate-900 font-semibold text-lg">{predictData.user_profile.RiskScore}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-slate-600 text-xs font-medium">Investment Horizon</p>
+                  <p className="text-slate-900 font-semibold text-lg">{predictData.user_profile.InvestmentHorizon}yr</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-slate-600 text-xs font-medium">Dependents</p>
+                  <p className="text-slate-900 font-semibold text-lg">{predictData.user_profile.Dependents}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-slate-600 text-xs font-medium">Annual Income</p>
+                  <p className="text-slate-900 font-semibold text-sm">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
       </div>
 
       {showSearch && (
         <StockSearchDialog
-          onSelect={(symbol, name) => {
-            setShowSearch(false)
-            handleBuyStock(symbol, name)
-          }}
+          authToken={authToken}
           onClose={() => setShowSearch(false)}
-        />
-      )}
-
-      {selectedStock && (
-        <BuyStockDialog
-          symbol={selectedStock.symbol}
-          name={selectedStock.name}
-          currentPrice={selectedStock.price}
-          onClose={() => setSelectedStock(null)}
-          onSuccess={() => {
-            setSelectedStock(null)
-            location.reload()
-          }}
-        />
-      )}
-
-      {sellStock && (
-        <SellStockDialog
-          symbol={sellStock.symbol}
-          name={sellStock.name}
-          currentPrice={sellStock.current_price}
-          quantity={sellStock.quantity}
-          averagePrice={sellStock.average_price}
-          onClose={() => setSellStock(null)}
-          onSuccess={() => {
-            setSellStock(null)
-            location.reload()
-          }}
         />
       )}
 

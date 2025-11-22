@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
         
         if (errorJson.message && errorJson.message.includes('already exists')) {
           console.log('User already exists in friend API, proceeding with login')
-          return NextResponse.json({ success: true, message: 'User already exists' }, { status: 200 })
+          const nextRes = NextResponse.json({ success: true, message: 'User already exists' }, { status: 200 })
+          const cookie = response.headers.get('set-cookie')
+          if (cookie) {
+            nextRes.headers.set('set-cookie', cookie)
+          }
+          return nextRes
         }
       } catch {
       }
@@ -42,7 +47,14 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     console.log('Friend API new user response:', data)
-    return NextResponse.json(data)
+    
+    const nextRes = NextResponse.json(data, { status: response.status })
+    const cookie = response.headers.get('set-cookie')
+    if (cookie) {
+      console.log('Forwarding cookie from Friend API')
+      nextRes.headers.set('set-cookie', cookie)
+    }
+    return nextRes
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json(

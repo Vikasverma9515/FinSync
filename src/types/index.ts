@@ -3,10 +3,14 @@ export interface UserProfile {
   email: string
   full_name: string
   age: number
-  risk_tolerance: 'low' | 'medium' | 'high'
-  investment_goal: string
-  monthly_investment: number
-  initial_capital: number
+  risk_score: number
+  investment_horizon: number
+  financial_goal: number
+  financial_condition: number
+  annual_income: number
+  total_net_worth: number
+  dependents: number
+  investment_knowledge: number
   created_at: string
   updated_at: string
 }

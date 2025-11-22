@@ -81,10 +81,11 @@ Do not include any markdown, asterisks, or additional text. Just the JSON object
 
 User Profile:
 - Age: ${profile.age}
-- Risk Tolerance: ${profile.risk_tolerance}
-- Investment Goal: ${profile.investment_goal}
-- Monthly Investment: $${profile.monthly_investment}
-- Initial Capital: $${profile.initial_capital}
+- Risk Score: ${profile.risk_score}
+- Investment Horizon: ${profile.investment_horizon} years
+- Annual Income: $${profile.annual_income}
+- Total Net Worth: $${profile.total_net_worth}
+- Dependents: ${profile.dependents}
 
 ${portfolioInfo}
 
@@ -130,10 +131,10 @@ Financial Goals: ${questionnaireData.financialGoals.join(', ')}
 
 ${userProfile ? `User Profile:
 - Age: ${userProfile.age}
-- Risk Tolerance: ${userProfile.risk_tolerance}
-- Investment Goal: ${userProfile.investment_goal}
-- Monthly Investment: ₹${userProfile.monthly_investment}
-- Initial Capital: ₹${userProfile.initial_capital}` : ''}
+- Risk Score: ${userProfile.risk_score}
+- Investment Horizon: ${userProfile.investment_horizon} years
+- Annual Income: ₹${userProfile.annual_income}
+- Total Net Worth: ₹${userProfile.total_net_worth}` : ''}
 
 Create a comprehensive investment plan with:
 1. Plan name and description
@@ -212,8 +213,8 @@ Format: Just the 10 points, one per line, no numbering or bullets.`
 
 User Profile:
 - Age: ${profile.age}
-- Risk Tolerance: ${profile.risk_tolerance}
-- Investment Goal: ${profile.investment_goal}
+- Risk Score: ${profile.risk_score}
+- Investment Horizon: ${profile.investment_horizon} years
 
 Portfolio Holdings:
 ${portfolioSummary}
@@ -258,7 +259,7 @@ Response format:
     let contextInfo = ''
 
     if (context?.profile) {
-      contextInfo += `\nUser: Age ${context.profile.age}, ${context.profile.risk_tolerance} risk, goal: ${context.profile.investment_goal}`
+      contextInfo += `\nUser: Age ${context.profile.age}, Risk Score: ${context.profile.risk_score}, Investment Horizon: ${context.profile.investment_horizon} years`
     }
 
     if (context?.portfolio && context.portfolio.length > 0) {

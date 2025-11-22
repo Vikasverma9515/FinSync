@@ -312,8 +312,8 @@ class InvestmentPlanService {
     };
 
     const age = userProfile?.age || 35;
-    const monthlyInvestment = userProfile?.monthly_investment || 10000;
-    const initialCapital = userProfile?.initial_capital || 100000;
+    const monthlyInvestment = userProfile ? Math.floor(userProfile.annual_income / 12) : 10000;
+    const initialCapital = userProfile?.total_net_worth || 100000;
 
     return {
       plan_name: `${age < 35 ? 'Young Investor' : age < 50 ? 'Mid-Career' : 'Experienced Investor'} ${questionnaireData.riskComfort.charAt(0).toUpperCase() + questionnaireData.riskComfort.slice(1)} Strategy`,

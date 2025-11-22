@@ -21,21 +21,28 @@ const STOCK_RECOMMENDATIONS: Record<string, { low: string[]; medium: string[]; h
   },
 }
 
+function getRiskToleranceFromScore(riskScore: number): 'low' | 'medium' | 'high' {
+  if (riskScore <= 3) return 'low'
+  if (riskScore <= 6) return 'medium'
+  return 'high'
+}
+
 export function generateInvestmentPlan(profile: UserProfile): InvestmentPlanRecommendation {
-  const allocations = getAllocationByRisk(profile.risk_tolerance, profile.age)
-  const selectedStocks = selectStocksForRisk(profile.risk_tolerance)
+  const riskTolerance = getRiskToleranceFromScore(profile.risk_score)
+  const allocations = getAllocationByRisk(riskTolerance, profile.age)
+  const selectedStocks = selectStocksForRisk(riskTolerance)
 
   const portfolio: RecommendedAsset[] = selectedStocks.map((stock, index) => ({
     symbol: stock,
     name: stock,
     allocation: allocations[index],
-    reason: getReasonForStock(stock, profile.risk_tolerance),
+    reason: getReasonForStock(stock, riskTolerance),
   }))
 
   return {
     portfolio,
-    summary: generateSummary(profile),
-    riskLevel: profile.risk_tolerance,
+    summary: generateSummary(profile, riskTolerance),
+    riskLevel: riskTolerance,
   }
 }
 
@@ -136,8 +143,8 @@ function getReasonForStock(stock: string, riskTolerance: string): string {
   )
 }
 
-function generateSummary(profile: UserProfile): string {
-  const baseMessage = `Based on your profile (age ${profile.age}, ${profile.risk_tolerance} risk tolerance, ₹${profile.initial_capital} initial capital)`
+function generateSummary(profile: UserProfile, riskTolerance: 'low' | 'medium' | 'high'): string {
+  const baseMessage = `Based on your profile (age ${profile.age}, risk score ${profile.risk_score}, net worth ₹${profile.total_net_worth.toLocaleString()})`
 
   const goals: Record<string, string> = {
     low: ', we recommend a conservative portfolio focused on dividend-yielding stocks and stable companies.',
@@ -146,5 +153,5 @@ function generateSummary(profile: UserProfile): string {
     high: ', we recommend an aggressive growth portfolio with exposure to emerging opportunities.',
   }
 
-  return baseMessage + (goals[profile.risk_tolerance] || goals.medium)
+  return baseMessage + (goals[riskTolerance] || goals.medium)
 }

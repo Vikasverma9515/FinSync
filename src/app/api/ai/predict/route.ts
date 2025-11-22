@@ -78,7 +78,12 @@ export async function GET(request: NextRequest) {
           if (response.ok) {
             const data = await response.json()
             console.log(`Friend API predict response for ${symbol}:`, data)
-            return NextResponse.json(data)
+            const nextRes = NextResponse.json(data, { status: response.status })
+            const cookie = response.headers.get('set-cookie')
+            if (cookie) {
+              nextRes.headers.set('set-cookie', cookie)
+            }
+            return nextRes
           }
         }
       } catch (error) {
@@ -107,7 +112,12 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     console.log(`Friend API predict response for ${symbol}:`, data)
-    return NextResponse.json(data)
+    const nextRes = NextResponse.json(data, { status: response.status })
+    const cookie = response.headers.get('set-cookie')
+    if (cookie) {
+      nextRes.headers.set('set-cookie', cookie)
+    }
+    return nextRes
   } catch (error) {
     console.error('Error fetching prediction:', error)
     return NextResponse.json(

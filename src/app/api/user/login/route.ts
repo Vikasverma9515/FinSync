@@ -28,10 +28,18 @@ export async function POST(request: NextRequest) {
     const userId = data.foundUser?._id
     const token = await createFriendAPISession(body.email, body.password, userId)
     
-    return NextResponse.json({
+    const nextRes = NextResponse.json({
       ...data,
       token,
-    })
+    }, { status: response.status })
+    
+    const cookie = response.headers.get('set-cookie')
+    if (cookie) {
+      console.log('Forwarding cookie from Friend API')
+      nextRes.headers.set('set-cookie', cookie)
+    }
+    
+    return nextRes
   } catch (error) {
     console.error('Error logging in:', error)
     return NextResponse.json(
