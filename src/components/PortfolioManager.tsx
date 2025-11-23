@@ -59,7 +59,7 @@ export function PortfolioManager({ holdings, onStockRemoved, authToken }: Portfo
 
       console.log('Stock removed from portfolio successfully')
       alert(`Successfully sold ${sellData.quantity} shares of ${selectedStock.symbol}!`)
-      
+
       setShowSellForm(false)
       setSelectedStock(null)
       onStockRemoved?.()
@@ -82,8 +82,8 @@ export function PortfolioManager({ holdings, onStockRemoved, authToken }: Portfo
 
   if (holdings.length === 0) {
     return (
-      <Card className="bg-white border-slate-200 shadow-sm">
-        <div className="text-center py-8 text-slate-600">
+      <Card className="bg-navy-800/50 border-slate-700/50 shadow-sm">
+        <div className="text-center py-8 text-slate-400">
           <p>No stocks in portfolio. Add one to get started!</p>
         </div>
       </Card>
@@ -91,26 +91,26 @@ export function PortfolioManager({ holdings, onStockRemoved, authToken }: Portfo
   }
 
   return (
-    <Card className="bg-white border-slate-200 shadow-sm">
-      <h4 className="text-lg font-semibold text-slate-900 mb-4">Portfolio Holdings</h4>
+    <Card className="bg-navy-800/50 border-slate-700/50 shadow-sm">
+      <h4 className="text-lg font-semibold text-white mb-4">Portfolio Holdings</h4>
       <div className="space-y-2">
         {holdings.map((holding) => (
-          <div key={holding.symbol} className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between">
+          <div key={holding.symbol} className="p-3 bg-navy-900 border-slate-700 flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-slate-900 font-medium">{holding.symbol}</p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-white font-medium">{holding.symbol}</p>
+              <p className="text-slate-400 text-sm">
                 {holding.quantity} shares @ ₹{holding.average_price.toFixed(2)}
               </p>
             </div>
             <div className="text-right mr-3">
-              <p className="text-slate-900 font-semibold">₹{(holding.quantity * holding.average_price).toFixed(2)}</p>
-              <p className="text-slate-600 text-xs">Total invested</p>
+              <p className="text-white font-semibold">₹{(holding.quantity * holding.average_price).toFixed(2)}</p>
+              <p className="text-slate-400 text-xs">Total invested</p>
             </div>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => handleSelectStock(holding)}
-              className="text-red-600 hover:bg-red-50"
+              className="text-rose-400 hover:bg-rose-400/10"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -119,46 +119,46 @@ export function PortfolioManager({ holdings, onStockRemoved, authToken }: Portfo
       </div>
 
       {selectedStock && (
-        <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+        <div className="mt-6 p-4 bg-rose-400/10 border-rose-400/20">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingDown className="w-5 h-5 text-red-600" />
-            <h5 className="font-semibold text-slate-900">Sell {selectedStock.symbol}</h5>
+            <TrendingDown className="w-5 h-5 text-rose-400" />
+            <h5 className="font-semibold text-white">Sell {selectedStock.symbol}</h5>
           </div>
 
           {!showSellForm ? (
             <Button
               onClick={() => setShowSellForm(true)}
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
+              className="w-full bg-rose-500 hover:bg-rose-600 text-white"
             >
               Proceed to Sell
             </Button>
           ) : (
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-slate-700">Quantity to Sell (Max: {selectedStock.quantity})</label>
+                <label className="text-sm font-medium text-slate-300">Quantity to Sell (Max: {selectedStock.quantity})</label>
                 <input
                   type="number"
                   min="1"
                   max={selectedStock.quantity}
                   value={sellData.quantity}
                   onChange={(e) => setSellData({ ...sellData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg focus:border-red-500 focus:outline-none"
+                  className="w-full mt-1 px-3 py-2 border bg-navy-800 border-slate-700 text-white focus:border-rose-500 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700">Selling Price (₹)</label>
+                <label className="text-sm font-medium text-slate-300">Selling Price (₹)</label>
                 <input
                   type="number"
                   min="0.01"
                   step="0.01"
                   value={sellData.price}
                   onChange={(e) => setSellData({ ...sellData, price: parseFloat(e.target.value) || 0 })}
-                  className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg focus:border-red-500 focus:outline-none"
+                  className="w-full mt-1 px-3 py-2 border bg-navy-800 border-slate-700 text-white focus:border-rose-500 focus:outline-none"
                 />
               </div>
-              <div className="p-2 bg-slate-100 rounded text-sm">
-                <p className="text-slate-700">
-                  Profit/Loss: <span className={sellData.price * sellData.quantity - selectedStock.average_price * sellData.quantity >= 0 ? 'text-emerald-600 font-semibold' : 'text-red-600 font-semibold'}>
+              <div className="p-2 bg-navy-900 rounded text-sm">
+                <p className="text-slate-300">
+                  Profit/Loss: <span className={sellData.price * sellData.quantity - selectedStock.average_price * sellData.quantity >= 0 ? 'text-teal-400 font-semibold' : 'text-rose-400 font-semibold'}>
                     ₹{(sellData.price * sellData.quantity - selectedStock.average_price * sellData.quantity).toFixed(2)}
                   </span>
                 </p>
@@ -167,7 +167,7 @@ export function PortfolioManager({ holdings, onStockRemoved, authToken }: Portfo
                 <Button
                   onClick={handleSellStock}
                   disabled={isSelling}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-white"
                 >
                   {isSelling ? 'Selling...' : 'Confirm Sale'}
                 </Button>

@@ -1,9 +1,9 @@
 /**
  * Investment Plan AI Service
- * Handles personalized investment plan generation using Gemini AI
+ * Handles personalized investment plan generation using Groq AI
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import type { InvestmentQuestionnaireData, UserProfile, InvestmentPlanOutput } from '../../../types';
 
 export interface AIConfig {
@@ -26,7 +26,7 @@ export interface AIResponse<T = any> {
 
 class InvestmentPlanService {
   private config: AIConfig = {
-    model: 'gemini-pro',
+    model: 'llama-3.1-8b-instant',
     temperature: 0.7,
     maxTokens: 3000,
   };
@@ -41,19 +41,43 @@ class InvestmentPlanService {
     const startTime = Date.now();
 
     try {
-      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
-      const model = genAI.getGenerativeModel({ model: this.config.model });
+      const client = new OpenAI({
+        apiKey: process.env.GROQ_API_KEY,
+        baseURL: "https://api.groq.com/openai/v1",
+      });
 
       // Create the prompt
       const userPrompt = this.createInvestmentPrompt(questionnaireData, userProfile);
 
-      const result = await model.generateContent(userPrompt);
-      const response = result.response;
-      const text = response.text();
+      const response = await client.chat.completions.create({
+        model: this.config.model,
+        messages: [
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+        temperature: this.config.temperature,
+        max_tokens: this.config.maxTokens,
+      });
 
-      // Parse JSON from response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const text = response.choices[0]?.message?.content || "";
+
+      console.log('Raw response from Groq:', text);
+
+      // Parse JSON from response - handle markdown code blocks
+      let jsonText = text;
+
+      // Remove markdown code blocks if present
+      const codeBlockMatch = text.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
+      if (codeBlockMatch) {
+        jsonText = codeBlockMatch[1];
+      }
+
+      // Try to extract JSON object
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('Failed to extract JSON. Response text:', text);
         throw new Error("No JSON found in response");
       }
 
@@ -87,47 +111,89 @@ class InvestmentPlanService {
   private createInvestmentPrompt(questionnaireData: InvestmentQuestionnaireData, userProfile?: UserProfile): string {
     const age = userProfile?.age || 35;
     const monthlyIncome = userProfile?.annual_income ? userProfile.annual_income / 12 : 50000;
+    const annualIncome = userProfile?.annual_income || 600000;
     const netWorth = userProfile?.total_net_worth || 500000;
+    const dependents = userProfile?.dependents || 0;
+    const monthlyCommitment = questionnaireData.monthlyCommitment ? parseInt(questionnaireData.monthlyCommitment) : Math.floor(monthlyIncome * 0.2);
 
-    return `You are an expert Indian investment advisor. Create a detailed personalized investment plan based on the following profile:
+    const investmentHorizonYears = questionnaireData.investmentHorizon === 'short' ? 3 :
+      questionnaireData.investmentHorizon === 'medium' ? 7 : 15;
 
-User Profile:
-- Age: ${age} years
-- Monthly Income: ₹${monthlyIncome.toLocaleString()}
-- Net Worth: ₹${netWorth.toLocaleString()}
+    const planTypeDescriptions = {
+      'growth_accelerator': 'aggressive growth with maximum returns potential',
+      'balanced_wealth_builder': 'balanced approach with steady wealth accumulation',
+      'conservative_income_generator': 'conservative approach focusing on steady income and capital preservation'
+    };
+
+    return `You are a highly experienced Indian financial advisor with 20+ years of expertise in stock market investments, mutual funds, and wealth management. 
+
+USER PROFILE:
+- Age: ${age} years old
+- Annual Income: ₹${annualIncome.toLocaleString()}
+- Monthly Income: ₹${monthlyIncome.toFixed(0).toLocaleString()}
+- Current Net Worth: ₹${netWorth.toLocaleString()}
+- Dependents: ${dependents}
 - Experience Level: ${questionnaireData.experienceLevel}
-- Risk Comfort: ${questionnaireData.riskComfort}
-- Investment Horizon: ${questionnaireData.investmentHorizon}
-- Plan Type: ${questionnaireData.planType}
-- Financial Goals: ${questionnaireData.financialGoals?.join(', ') || 'General wealth creation'}
+- Risk Tolerance: ${questionnaireData.riskComfort}
+- Investment Horizon: ${investmentHorizonYears} years
+- Monthly Investment Capacity: ₹${monthlyCommitment.toLocaleString()}
+- Strategy: ${planTypeDescriptions[questionnaireData.planType as keyof typeof planTypeDescriptions]}
+- Financial Goals: ${questionnaireData.financialGoals?.join(', ') || 'Long-term wealth creation'}
+- Preferred Sectors: ${questionnaireData.preferredSectors?.join(', ') || 'Technology, Banking, FMCG, Pharma'}
 
-Please provide a comprehensive investment plan in the following JSON format:
+CREATE A HIGHLY PERSONALIZED INVESTMENT PLAN with these specific requirements:
+
+1. **SPECIFIC INVESTMENT AMOUNTS**: Calculate exact rupee amounts based on their income
+2. **REAL NUMBERS & PROJECTIONS**: Include specific 1-year, 3-year, 5-year wealth projections
+3. **SAVINGS STRATEGY**: Recommend how much to save monthly and from which income bucket
+4. **CONCRETE EXAMPLES**: Use their actual income/net worth in all examples
+5. **ACTIONABLE STEPS**: Provide step-by-step implementation with specific timelines and amounts
+6. **TAX EFFICIENCY**: Include tax-saving strategies relevant to their income bracket
+7. **RISK MITIGATION**: Specify exactly what percentage should go to debt/fixed deposits
+
+Respond ONLY with valid JSON in this exact format:
 {
-  "plan_name": "string",
-  "plan_type": "string",
-  "description": "string",
-  "risk_level": "low|medium|high",
-  "expected_return": "string",
+  "plan_name": "A compelling, personalized plan name reflecting their strategy",
+  "plan_type": "${questionnaireData.planType}",
+  "description": "2-3 sentences deeply personalized to their situation with specific income/age references",
+  "risk_level": "${questionnaireData.riskComfort === 'high' ? 'high' : questionnaireData.riskComfort === 'low' ? 'low' : 'medium'}",
+  "expected_return": "e.g., '12-15% annually based on your portfolio, which could grow your ₹${netWorth.toLocaleString()} to ₹X in ${investmentHorizonYears} years'",
   "recommended_stocks": [
     {
-      "symbol": "string",
+      "symbol": "string (NSE symbol with .NS)",
       "name": "string",
-      "allocation": number,
+      "allocation": number (percentage, must sum to 100),
       "sector": "string",
-      "reasoning": "string"
+      "reasoning": "Specific reason why this stock fits their profile with numbers if applicable"
+    }
+  ],
+  "allocation": [
+    {
+      "assetClass": "string (e.g., 'Large Cap Stocks', 'Government Bonds')",
+      "percentage": number (must sum to 100),
+      "reasoning": "Brief explanation"
+    }
+  ],
+  "suggestions": [
+    {
+      "name": "string (e.g., 'Nifty 50 ETF')",
+      "type": "string (e.g., 'ETF', 'Mutual Fund')",
+      "description": "Brief description",
+      "expectedReturn": "string (e.g., '12-14%')",
+      "riskLevel": "string (e.g., 'Medium')"
     }
   ],
   "steps": [
     {
-      "step_number": number,
-      "title": "string",
-      "description": "string",
-      "actions": ["string"],
-      "timeline": "string",
-      "expected_outcome": "string"
+      "step_number": 1,
+      "title": "Actionable step title",
+      "description": "Detailed description with specific amounts based on their monthly commitment of ₹${monthlyCommitment}",
+      "actions": ["Specific action 1 with numbers", "Specific action 2 with timeline"],
+      "timeline": "Specific timeline",
+      "expected_outcome": "Concrete outcome with rupee amounts"
     }
   ],
-  "summary": "string",
+  "summary": "Comprehensive summary explaining exactly how they will accumulate wealth with specific monthly/yearly figures",
   "status": "ok"
 }`;
   }
@@ -141,6 +207,8 @@ Please provide a comprehensive investment plan in the following JSON format:
       risk_level: ['low', 'medium', 'high'].includes(planData.risk_level) ? planData.risk_level : 'medium',
       expected_return: planData.expected_return || '10-14% annually, depending on market conditions',
       recommended_stocks: this.validateStocks(planData.recommended_stocks || []),
+      allocation: this.validateAllocation(planData.allocation || []),
+      suggestions: this.validateSuggestions(planData.suggestions || []),
       steps: this.validateSteps(planData.steps || []),
       summary: planData.summary || 'This plan provides a structured approach to building wealth while managing risk appropriately for your profile.',
       status: planData.status || 'ok',
@@ -200,6 +268,88 @@ Please provide a comprehensive investment plan in the following JSON format:
       timeline: step.timeline || '1-2 weeks',
       expected_outcome: step.expected_outcome || 'Progress towards your investment goals',
     }));
+  }
+
+  private validateAllocation(allocation: any[]): Array<{
+    assetClass: string;
+    percentage: number;
+    reasoning: string;
+  }> {
+    if (!Array.isArray(allocation) || allocation.length === 0) {
+      return this.getDefaultAllocation();
+    }
+
+    // Ensure allocations sum to 100%
+    const totalAllocation = allocation.reduce((sum, item) => sum + (item.percentage || 0), 0);
+    if (totalAllocation !== 100) {
+      // Normalize allocations
+      allocation = allocation.map(item => ({
+        ...item,
+        percentage: Math.round((item.percentage / totalAllocation) * 100)
+      }));
+    }
+
+    return allocation.map(item => ({
+      assetClass: item.assetClass || 'Diversified Assets',
+      percentage: item.percentage || 0,
+      reasoning: item.reasoning || 'Portfolio diversification',
+    }));
+  }
+
+  private validateSuggestions(suggestions: any[]): Array<{
+    name: string;
+    type: string;
+    description: string;
+    expectedReturn: string;
+    riskLevel: string;
+  }> {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+      return this.getDefaultSuggestions();
+    }
+
+    return suggestions.map(item => ({
+      name: item.name || 'Investment Option',
+      type: item.type || 'Asset',
+      description: item.description || 'Recommended investment',
+      expectedReturn: item.expectedReturn || 'Market Rate',
+      riskLevel: item.riskLevel || 'Moderate',
+    }));
+  }
+
+  private getDefaultAllocation() {
+    return [
+      { assetClass: 'Large Cap Stocks', percentage: 40, reasoning: 'Stability and steady growth' },
+      { assetClass: 'Mid Cap Stocks', percentage: 20, reasoning: 'Higher growth potential' },
+      { assetClass: 'Government Bonds', percentage: 20, reasoning: 'Capital preservation' },
+      { assetClass: 'Gold/Commodities', percentage: 10, reasoning: 'Hedge against inflation' },
+      { assetClass: 'Cash/Liquid Funds', percentage: 10, reasoning: 'Emergency liquidity' },
+    ];
+  }
+
+  private getDefaultSuggestions() {
+    return [
+      {
+        name: 'Nifty 50 ETF',
+        type: 'ETF',
+        description: 'Low-cost exposure to top 50 Indian companies',
+        expectedReturn: '12-14%',
+        riskLevel: 'Medium'
+      },
+      {
+        name: 'HDFC Balanced Advantage Fund',
+        type: 'Mutual Fund',
+        description: 'Dynamic asset allocation for stability',
+        expectedReturn: '10-12%',
+        riskLevel: 'Low-Medium'
+      },
+      {
+        name: 'Sovereign Gold Bonds',
+        type: 'Government Bond',
+        description: 'Safe gold investment with 2.5% extra interest',
+        expectedReturn: 'Gold Price + 2.5%',
+        riskLevel: 'Low'
+      }
+    ];
   }
 
   private getDefaultStocks() {
@@ -350,6 +500,8 @@ Please provide a comprehensive investment plan in the following JSON format:
       risk_level: questionnaireData.riskComfort === 'high' ? 'high' : questionnaireData.riskComfort === 'low' ? 'low' : 'medium',
       expected_return: this.getExpectedReturn(questionnaireData, userProfile),
       recommended_stocks: this.getDefaultStocks(),
+      allocation: this.getDefaultAllocation(),
+      suggestions: this.getDefaultSuggestions(),
       steps: this.getDefaultSteps(),
       summary: `This isn't just any investment plan - it's tailored for someone exactly like you. With your ${questionnaireData.experienceLevel} background and focus on ${questionnaireData.financialGoals?.join(' and ') || 'wealth creation'}, we're building something sustainable. Remember, markets fluctuate, but disciplined investing with proper diversification has historically worked for investors with similar profiles.`,
       status: 'ok',

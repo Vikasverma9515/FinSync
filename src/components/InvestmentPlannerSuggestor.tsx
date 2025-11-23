@@ -28,6 +28,17 @@ import type {
   UserProfile,
 } from "../types";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "./ui/button";
+import InvestmentBasicsCard from "./InvestmentBasicsCard";
+import WhereToInvestCard from "./WhereToInvestCard";
+import InvestmentDosAndDonts from "./InvestmentDosAndDonts";
 
 interface InvestmentPlannerSuggestorProps {
   onBack: () => void;
@@ -223,11 +234,11 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "#FFFEFE" }}>
+      <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-6 py-20">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Error Generating Plan</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <h2 className="text-2xl font-bold text-rose-500 mb-4">Error Generating Plan</h2>
+            <p className="text-slate-400 mb-6">{error}</p>
             <button
               onClick={() => setError(null)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -242,16 +253,16 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "#FFFEFE" }}>
+      <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-6 py-20">
           <div className="flex flex-col items-center justify-center">
             <motion.div
               className="w-20 h-20 rounded-full mb-8 flex items-center justify-center"
-              style={{ backgroundColor: "#FFEDEB" }}
+              style={{ backgroundColor: "#1F2A37" }}
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <PieChart className="w-10 h-10 text-slate-900" />
+              <PieChart className="w-10 h-10 text-teal-400" />
             </motion.div>
 
             <motion.div
@@ -263,7 +274,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
               <h2
                 className="text-3xl mb-4"
                 style={{
-                  color: "#131E29",
+                  color: "#E2E8F0",
                   fontWeight: "400",
                   letterSpacing: "-0.01em",
                 }}
@@ -273,7 +284,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
               <p
                 className="text-lg"
                 style={{
-                  color: "#6C737A",
+                  color: "#94A3B8",
                   fontFamily: "'Inter', -apple-system, sans-serif",
                 }}
               >
@@ -288,11 +299,11 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
   if (showResults && generatedPlan) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#FFFEFE" }}>
+      <div className="min-h-screen p-4">
         {/* Header Navigation */}
         <motion.div
-          className="sticky z-0 border-b lg:static bg-white"
-          style={{ borderColor: "#C4C7CA", top: layoutOffset }}
+          className="sticky z-0 border-b lg:static bg-navy-900"
+          style={{ borderColor: "#334155", top: layoutOffset }}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -305,13 +316,13 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   setShowResults(false);
                   setError(null);
                 }}
-                className="p-1.5 sm:p-2 -ml-1 sm:ml-0 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+                className="p-1.5 sm:p-2 -ml-1 sm:ml-0 rounded-lg hover:bg-navy-800 transition-colors flex-shrink-0"
                 whileHover={{ x: -5 }}
                 transition={{ duration: 0.2 }}
               >
                 <ArrowLeft
                   className="w-4 sm:w-5 h-4 sm:h-5"
-                  style={{ color: "#131E29" }}
+                  style={{ color: "#E2E8F0" }}
                 />
               </motion.button>
 
@@ -319,21 +330,21 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <div
                   className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: "#FFEDEB" }}
+                  style={{ backgroundColor: "#1F2A37" }}
                 >
-                  <PieChart className="w-4 sm:w-5 lg:w-8 h-4 sm:h-5 lg:h-8 text-slate-900" />
+                  <PieChart className="w-4 sm:w-5 lg:w-8 h-4 sm:h-5 lg:h-8 text-teal-400" />
                 </div>
                 <div className="min-w-0">
                   <h1
                     className="text-base sm:text-lg lg:text-2xl font-normal leading-tight"
                     style={{
-                      color: "#131E29",
+                      color: "#E2E8F0",
                       letterSpacing: "-0.02em",
                     }}
                   >
                     {generatedPlan.plan_name}
                   </h1>
-                  <div className="text-xs sm:text-sm hidden sm:block" style={{ color: "#6C737A" }}>
+                  <div className="text-xs sm:text-sm hidden sm:block" style={{ color: "#94A3B8" }}>
                     Personalized Investment Plan
                   </div>
                 </div>
@@ -346,8 +357,8 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   disabled={loading}
                   className="p-1.5 sm:p-2 lg:px-3 lg:py-2 rounded-lg sm:rounded-xl lg:rounded-2xl font-medium transition-all disabled:opacity-50 flex items-center gap-1 sm:gap-2"
                   style={{
-                    backgroundColor: loading ? "#C4C7CA" : "#FF6A5C",
-                    color: "white",
+                    backgroundColor: loading ? "#334155" : "#0D9488",
+                    color: "#E2E8F0",
                   }}
                   whileHover={!loading ? { scale: 1.02 } : {}}
                   whileTap={!loading ? { scale: 0.98 } : {}}
@@ -383,7 +394,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                 >
                   <div
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-                    style={{ backgroundColor: "#FFEDEB", color: "#FF6A5C" }}
+                    style={{ backgroundColor: "#1F2A37", color: "#0D9488" }}
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm font-medium">Plan Ready</span>
@@ -392,7 +403,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <h1
                     className="text-2xl sm:text-4xl lg:text-5xl mb-4 sm:mb-6"
                     style={{
-                      color: "#131E29",
+                      color: "#E2E8F0",
                       fontWeight: "400",
                       letterSpacing: "-0.02em",
                     }}
@@ -402,7 +413,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <p
                     className="text-base sm:text-xl max-w-3xl mx-auto"
                     style={{
-                      color: "#6C737A",
+                      color: "#94A3B8",
                       fontFamily: "'Inter', -apple-system, sans-serif",
                     }}
                   >
@@ -418,28 +429,28 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   transition={{ duration: 0.6 }}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-                    <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#C4C7CA" }}>
+                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
                       <div className="flex items-center gap-3 mb-3">
                         <TrendingUp className="w-5 h-5 text-green-600" />
-                        <span className="font-medium text-gray-900">Expected Return</span>
+                        <span className="font-medium text-white">Expected Return</span>
                       </div>
                       <p className="text-2xl font-bold text-green-600">{generatedPlan.expected_return}</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#C4C7CA" }}>
+                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
                       <div className="flex items-center gap-3 mb-3">
                         <Target className="w-5 h-5 text-blue-600" />
-                        <span className="font-medium text-gray-900">Risk Level</span>
+                        <span className="font-medium text-white">Risk Level</span>
                       </div>
                       <p className="text-2xl font-bold text-blue-600 capitalize">{generatedPlan.risk_level}</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#C4C7CA" }}>
+                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
                       <div className="flex items-center gap-3 mb-3">
-                        <PieChart className="w-5 h-5 text-slate-900" />
-                        <span className="font-medium text-gray-900">Stocks</span>
+                        <PieChart className="w-5 h-5 text-teal-400" />
+                        <span className="font-medium text-white">Stocks</span>
                       </div>
-                      <p className="text-2xl font-bold text-slate-900">{generatedPlan.recommended_stocks.length} stocks</p>
+                      <p className="text-2xl font-bold text-teal-400">{generatedPlan.recommended_stocks.length} stocks</p>
                     </div>
                   </div>
                 </motion.div>
@@ -451,26 +462,108 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                  <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4 lg:mb-6">Recommended Portfolio</h2>
+                  <h2 className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6">Recommended Portfolio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                     {generatedPlan.recommended_stocks.map((stock, index) => (
-                      <div key={index} className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#C4C7CA" }}>
+                      <div key={index} className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <h3 className="font-bold text-lg text-gray-900">{stock.name}</h3>
-                            <p className="text-sm text-gray-600">{stock.symbol}</p>
+                            <h3 className="font-bold text-lg text-white">{stock.name}</h3>
+                            <p className="text-sm text-slate-400">{stock.symbol}</p>
                           </div>
-                          <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-sm font-medium">
+                          <span className="px-3 py-1 bg-navy-900/50 text-teal-400 rounded-full text-sm font-medium">
                             {stock.allocation}%
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-3">{stock.sector}</p>
-                        <p className="text-sm text-gray-700">{stock.reasoning}</p>
+                        <p className="text-sm text-slate-400 mb-3">{stock.sector}</p>
+                        <p className="text-sm text-slate-300">{stock.reasoning}</p>
                       </div>
                     ))}
                   </div>
                 </motion.div>
 
+                {/* Summary */}
+                <Card className="bg-navy-800/50 border-slate-700/50">
+                  <CardHeader>
+                    <CardTitle className="text-white">Investment Strategy Overview</CardTitle>
+                    <CardDescription className="text-slate-400">{generatedPlan.summary}</CardDescription>
+                  </CardHeader>
+                </Card>
+
+                {/* Asset Allocation */}
+                <Card className="bg-navy-800/50 border-slate-700/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <PieChart className="w-5 h-5 text-teal-400" />
+                      Recommended Asset Allocation
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Based on your {formData.riskComfort} risk tolerance and {formData.investmentHorizon} horizon
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        {(generatedPlan.allocation || []).map((item: any, index: number) => (
+                          <div key={index} className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="font-medium text-white">{item.assetClass}</span>
+                              <span className="font-bold text-teal-400">{item.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-navy-900 rounded-full h-2">
+                              <div
+                                className="bg-teal-500 h-2 rounded-full"
+                                style={{ width: `${item.percentage}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-slate-400">{item.reasoning}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-center">
+                        {/* Placeholder for a real chart */}
+                        <div className="w-48 h-48 rounded-full border-8 border-teal-500/20 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-white">100%</div>
+                            <div className="text-xs text-slate-400">Diversified</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Suggested Instruments */}
+                <Card className="bg-navy-800/50 border-slate-700/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <TrendingUp className="w-5 h-5 text-teal-400" />
+                      Suggested Instruments
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Specific investment vehicles to consider
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {(generatedPlan.suggestions || []).map((suggestion: any, index: number) => (
+                        <div key={index} className="p-4 bg-navy-900/50 border border-slate-700/50 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-bold text-white">{suggestion.name}</h3>
+                            <span className="px-2 py-1 bg-teal-500/10 text-teal-400 text-xs rounded-full border border-teal-500/20">
+                              {suggestion.type}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-400 mb-3">{suggestion.description}</p>
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>Expected Return: <span className="text-teal-400">{suggestion.expectedReturn}</span></span>
+                            <span>Risk Level: <span className="text-white">{suggestion.riskLevel}</span></span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
                 {/* Implementation Steps */}
                 <motion.div
                   className="mb-6 lg:mb-8"
@@ -479,10 +572,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
                   <div className="flex items-center justify-between mb-4 lg:mb-6">
-                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Implementation Steps</h2>
+                    <h2 className="text-xl lg:text-2xl font-bold text-white">Implementation Steps</h2>
                     <button
                       onClick={() => setShowDetailedSteps(!showDetailedSteps)}
-                      className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      className="px-4 py-2 text-sm bg-navy-800 hover:bg-navy-700 text-slate-300 rounded-lg transition-colors"
                     >
                       {showDetailedSteps ? "Hide Details" : "Show Details"}
                     </button>
@@ -490,20 +583,20 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
                   <div className="space-y-4">
                     {generatedPlan.steps.map((step, index) => (
-                      <div key={index} className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#C4C7CA" }}>
+                      <div key={index} className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
                         <div className="flex items-start gap-4">
-                          <div className="w-8 h-8 bg-slate-100 text-slate-800 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                          <div className="w-8 h-8 bg-navy-900 text-teal-400 rounded-full flex items-center justify-center font-bold flex-shrink-0">
                             {step.step_number}
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-bold text-lg text-gray-900 mb-2">{step.title}</h3>
-                            <p className="text-gray-700 mb-3">{step.description}</p>
+                            <h3 className="font-bold text-lg text-white mb-2">{step.title}</h3>
+                            <p className="text-slate-300 mb-3">{step.description}</p>
 
                             {showDetailedSteps && (
                               <>
                                 <div className="mb-3">
-                                  <h4 className="font-medium text-gray-900 mb-2">Actions:</h4>
-                                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                  <h4 className="font-medium text-white mb-2">Actions:</h4>
+                                  <ul className="list-disc list-inside text-sm text-slate-400 space-y-1">
                                     {step.actions.map((action, actionIndex) => (
                                       <li key={actionIndex}>{action}</li>
                                     ))}
@@ -511,7 +604,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                                 </div>
 
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="text-gray-600">
+                                  <span className="text-slate-400">
                                     <Clock className="w-4 h-4 inline mr-1" />
                                     {step.timeline}
                                   </span>
@@ -530,31 +623,43 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
                 {/* Summary */}
                 <motion.div
-                  className="bg-green-50 rounded-2xl p-4 lg:p-6 border border-green-200"
+                  className="bg-teal-900/20 rounded-2xl p-4 lg:p-6 border border-teal-800"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
                   <div className="flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-green-600 mt-1" />
+                    <Sparkles className="w-5 h-5 text-teal-400 mt-1" />
                     <div>
-                      <h3 className="font-bold text-lg text-green-800 mb-2">Plan Summary</h3>
-                      <p className="text-green-700">{generatedPlan.summary}</p>
+                      <h3 className="font-bold text-lg text-teal-200 mb-2">Plan Summary</h3>
+                      <p className="text-teal-300">{generatedPlan.summary}</p>
                     </div>
                   </div>
+                </motion.div>
+
+                {/* Educational Components */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  className="space-y-6"
+                >
+                  <InvestmentBasicsCard riskLevel={formData.riskComfort as 'low' | 'medium' | 'high'} />
+                  <WhereToInvestCard />
+                  <InvestmentDosAndDonts />
                 </motion.div>
 
                 <motion.div
                   className="pt-4 sm:pt-6 pb-4 sm:pb-0"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
                 >
                   <motion.button
                     onClick={onBack}
                     className="w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 rounded-lg sm:rounded-2xl font-medium transition-all"
                     style={{
-                      backgroundColor: "#131E29",
+                      backgroundColor: "#0D9488",
                       color: "white",
                     }}
                     whileHover={{ scale: 1.02 }}
@@ -573,7 +678,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
   // Questionnaire Steps
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FFFEFE" }}>
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-20">
         {/* Header */}
         <motion.div
@@ -583,13 +688,13 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
           transition={{ duration: 0.6 }}
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <PieChart className="w-8 h-8 text-slate-900" />
-            <h1 className="text-2xl lg:text-3xl font-bold" style={{ color: "#131E29" }}>
-              Investment Plan Creator
+            <Sparkles className="w-8 h-8 text-teal-400" />
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">
+              Investment Planner
             </h1>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Answer a few questions and we'll create a personalized investment plan tailored to your goals and preferences.
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            Let's create a personalized investment strategy tailored to your goals and risk tolerance.
           </p>
         </motion.div>
 
@@ -601,16 +706,16 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-slate-300">
               Step {currentStep} of {totalSteps}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-slate-400">
               {getCompletionPercentage()}% Complete
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-navy-800 rounded-full h-2">
             <div
-              className="bg-slate-900 h-2 rounded-full transition-all duration-300"
+              className="bg-teal-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${getCompletionPercentage()}%` }}
             ></div>
           </div>
@@ -624,14 +729,13 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl shadow-sm border p-6 lg:p-8"
-            style={{ borderColor: "#C4C7CA" }}
+            className="bg-navy-800/50 rounded-2xl shadow-sm border border-slate-700/50 p-6 lg:p-8"
           >
             <div className="mb-6">
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl lg:text-2xl font-bold text-white mb-2">
                 {stepTitles[currentStep as keyof typeof stepTitles]}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-slate-400">
                 {stepDescriptions[currentStep as keyof typeof stepDescriptions]}
               </p>
             </div>
@@ -645,42 +749,41 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                     title: "Growth Accelerator Plan",
                     description: "High-growth focused portfolio for long-term wealth building",
                     icon: TrendingUp,
-                    color: "text-green-600",
-                    bgColor: "bg-green-100"
+                    color: "text-green-400",
+                    bgColor: "bg-green-900/20"
                   },
                   {
                     id: "balanced_wealth_builder",
                     title: "Balanced Wealth Builder",
                     description: "Balanced approach with growth and stability",
                     icon: Target,
-                    color: "text-blue-600",
-                    bgColor: "bg-blue-100"
+                    color: "text-blue-400",
+                    bgColor: "bg-blue-900/20"
                   },
                   {
                     id: "conservative_income_generator",
                     title: "Conservative Income Generator",
                     description: "Focus on stable income and capital preservation",
                     icon: DollarSign,
-                    color: "text-purple-600",
-                    bgColor: "bg-purple-100"
+                    color: "text-purple-400",
+                    bgColor: "bg-purple-900/20"
                   }
                 ].map((plan) => (
                   <button
                     key={plan.id}
                     onClick={() => handleInputChange("planType", plan.id)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all ${
-                      formData.planType === plan.id
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all ${formData.planType === plan.id
+                      ? "border-teal-500 bg-teal-500/10"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600"
+                      }`}
                   >
                     <div className="flex items-start gap-4">
                       <div className={`w-12 h-12 rounded-xl ${plan.bgColor} flex items-center justify-center flex-shrink-0`}>
                         <plan.icon className={`w-6 h-6 ${plan.color}`} />
                       </div>
                       <div className="text-left">
-                        <h3 className="font-bold text-lg text-gray-900 mb-1">{plan.title}</h3>
-                        <p className="text-gray-600">{plan.description}</p>
+                        <h3 className="font-bold text-lg text-white mb-1">{plan.title}</h3>
+                        <p className="text-slate-400">{plan.description}</p>
                       </div>
                     </div>
                   </button>
@@ -699,11 +802,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={option}
                     onClick={() => handleInputChange("experienceLevel", option)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.experienceLevel === option
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.experienceLevel === option
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     {option}
                   </button>
@@ -726,18 +828,16 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={sector}
                     onClick={() => handleMultiSelect("preferredSectors", sector)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.preferredSectors.includes(sector)
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.preferredSectors.includes(sector)
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        formData.preferredSectors.includes(sector)
-                          ? "border-slate-900 bg-slate-900"
-                          : "border-gray-300"
-                      }`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${formData.preferredSectors.includes(sector)
+                        ? "border-teal-500 bg-teal-500"
+                        : "border-slate-500"
+                        }`}>
                         {formData.preferredSectors.includes(sector) && (
                           <CheckCircle className="w-4 h-4 text-white" />
                         )}
@@ -760,11 +860,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={option}
                     onClick={() => handleInputChange("investmentHorizon", option)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.investmentHorizon === option
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.investmentHorizon === option
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     {option}
                   </button>
@@ -783,11 +882,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={option}
                     onClick={() => handleInputChange("riskComfort", option)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.riskComfort === option
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.riskComfort === option
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     {option}
                   </button>
@@ -807,11 +905,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={option}
                     onClick={() => handleInputChange("monthlyCommitment", option)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.monthlyCommitment === option
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.monthlyCommitment === option
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     {option}
                   </button>
@@ -833,18 +930,16 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
                   <button
                     key={goal}
                     onClick={() => handleMultiSelect("financialGoals", goal)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      formData.financialGoals.includes(goal)
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${formData.financialGoals.includes(goal)
+                      ? "border-teal-500 bg-teal-500/10 text-white"
+                      : "border-slate-700 bg-navy-900 hover:border-slate-600 text-slate-300"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        formData.financialGoals.includes(goal)
-                          ? "border-slate-900 bg-slate-900"
-                          : "border-gray-300"
-                      }`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${formData.financialGoals.includes(goal)
+                        ? "border-teal-500 bg-teal-500"
+                        : "border-slate-500"
+                        }`}>
                         {formData.financialGoals.includes(goal) && (
                           <CheckCircle className="w-4 h-4 text-white" />
                         )}
@@ -867,7 +962,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
         >
           <button
             onClick={currentStep === 1 ? onBack : prevStep}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-700 hover:border-slate-600 text-slate-300 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             {currentStep === 1 ? "Back" : "Previous"}
@@ -876,11 +971,10 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
           <button
             onClick={nextStep}
             disabled={!isStepValid()}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
-              isStepValid()
-                ? "bg-slate-900 text-white hover:bg-slate-800"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${isStepValid()
+              ? "bg-teal-500 hover:bg-teal-600 text-navy-900"
+              : "bg-slate-700 text-slate-400 cursor-not-allowed"
+              }`}
           >
             {currentStep === totalSteps ? "Generate Plan" : "Next"}
             {currentStep !== totalSteps && <ArrowRight className="w-4 h-4" />}

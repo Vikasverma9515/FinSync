@@ -375,14 +375,32 @@ export async function getFinancialCoachResponse(
 
 
 
-export function generateCoachWelcomeMessage(plan: FinancialFreedomPlan): FinancialCoachMessage {
-  const score = plan.freedomScore.score
+export function generateCoachWelcomeMessage(plan: any): FinancialCoachMessage {
+  // Calculate a basic score based on available data or use default
+  let score = 50 // default score
   let welcomeMessage = ''
+
+  // Try to get score from freedomScore if it exists
+  if (plan.freedomScore?.score) {
+    score = plan.freedomScore.score
+  } else if (plan.yearlyTargets && plan.yearlyTargets.length > 0) {
+    // Calculate score based on net worth growth
+    const firstYear = plan.yearlyTargets[0]
+    const lastYear = plan.yearlyTargets[plan.yearlyTargets.length - 1]
+    if (firstYear && lastYear && firstYear.netWorth && lastYear.netWorth) {
+      const growth = (lastYear.netWorth - firstYear.netWorth) / firstYear.netWorth
+      score = Math.min(100, Math.max(0, Math.round(growth * 100)))
+    }
+  }
+
+  const finalWealth = plan.wealthPathMap?.finalWealth ||
+                     (plan.yearlyTargets && plan.yearlyTargets.length > 0 ?
+                      plan.yearlyTargets[plan.yearlyTargets.length - 1]?.netWorth : 0)
 
   if (score >= 80) {
     welcomeMessage = `Excellent! Your Freedom Score of ${score} shows you're on an advanced path to financial independence. I'm here to help you maintain and accelerate your progress. What would you like to focus on today?`
   } else if (score >= 60) {
-    welcomeMessage = `Great progress! Your Freedom Score of ${score} indicates solid financial habits. Let's work together to push you toward that ${plan.wealthPathMap.finalWealth.toLocaleString()} goal. What's your main concern right now?`
+    welcomeMessage = `Great progress! Your Freedom Score of ${score} indicates solid financial habits. Let's work together to push you toward that ${finalWealth?.toLocaleString() || 'financial freedom'} goal. What's your main concern right now?`
   } else if (score >= 40) {
     welcomeMessage = `Good start! Your Freedom Score of ${score} means you're building a foundation. I can help you optimize your savings and investment strategy. What aspect of financial planning interests you most?`
   } else {

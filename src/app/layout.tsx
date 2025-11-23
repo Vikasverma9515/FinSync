@@ -39,7 +39,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter'
@@ -72,7 +72,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
-          <div className="min-h-screen bg-white">
+          <div className="min-h-screen bg-navy-900">
             {children}
           </div>
         </AuthProvider>

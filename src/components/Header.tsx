@@ -46,8 +46,9 @@ const getNavigationLinks = (user: any): NavigationLink[] => {
     // Logged in user navigation
     return [
       { label: "Dashboard", action: "dashboard" },
-      { label: "Investment Planner", action: "investmentplanner" },
-      { label: "Financial Freedom", action: "financialfreedom" },
+      { label: 'Investment Planner', href: '/plans/investment' },
+      { label: 'Freedom Planner', href: '/plans/freedom' },
+      { label: 'Tax Saver', href: '/plans/tax-saver' },
     ]
   } else {
     // Guest user navigation
@@ -217,7 +218,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
       </AnimatePresence>
 
       <header
-        className={`sticky top-0 z-50 bg-white border-b border-slate-200 ${className}`}
+        className={`sticky top-0 z-50 bg-navy-900/80 border-b border-slate-700/50 backdrop-blur-xl ${className}`}
         role="banner"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -230,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               whileTap={{ scale: 0.98 }}
               aria-label="Go to homepage"
             >
-              <div className="text-2xl font-bold text-slate-900">BankSync</div>
+              <div className="text-2xl font-bold text-white">BankSync</div>
             </motion.button>
 
             {/* Desktop Navigation */}
@@ -251,14 +252,14 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                         onClick={() => handleDropdownToggle(link.label)}
                         className="flex items-center space-x-1 text-sm font-medium transition-all duration-200 py-2 px-3 rounded-full border"
                         style={{
-                          color: activeDropdown === link.label ? "#10B981" : "#6C737A",
-                          backgroundColor: activeDropdown === link.label ? "#ECFDF5" : "transparent",
-                          borderColor: activeDropdown === link.label ? "#10B981" : "transparent",
+                          color: activeDropdown === link.label ? "#64ffda" : "#94a3b8",
+                          backgroundColor: activeDropdown === link.label ? "rgba(100, 255, 218, 0.1)" : "transparent",
+                          borderColor: activeDropdown === link.label ? "#64ffda" : "transparent",
                         }}
                         whileHover={{
-                          backgroundColor: "#ECFDF5",
-                          borderColor: "#10B981",
-                          color: "#10B981",
+                          backgroundColor: "rgba(100, 255, 218, 0.1)",
+                          borderColor: "#64ffda",
+                          color: "#64ffda",
                         }}
                         aria-haspopup="true"
                         aria-expanded={activeDropdown === link.label}
@@ -275,7 +276,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                       <AnimatePresence>
                         {activeDropdown === link.label && (
                           <motion.div
-                            className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 p-3"
+                            className="absolute top-full left-0 mt-2 w-80 bg-navy-900 rounded-xl shadow-xl border border-slate-700 z-50 p-3"
                             initial={{ opacity: 0, y: 8, scale: 0.96 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 8, scale: 0.96 }}
@@ -290,9 +291,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                     e.stopPropagation()
                                     handlePlanSelection(item.planId, item.comingSoon)
                                   }}
-                                  className={`flex items-center space-x-3 p-3 hover:bg-gray-50 transition-all duration-200 w-full text-left rounded-lg ${
-                                    item.comingSoon ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
-                                  }`}
+                                  className={`flex items-center space-x-3 p-3 hover:bg-navy-800 transition-all duration-200 w-full text-left rounded-lg ${item.comingSoon ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                                    }`}
                                   initial={{ opacity: 0, x: -8 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ duration: 0.2, delay: index * 0.03 }}
@@ -303,7 +303,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                   <div
                                     className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                     style={{
-                                      backgroundColor: item.comingSoon ? "#F8F9FA" : "#ECFDF5",
+                                      backgroundColor: item.comingSoon ? "rgba(255,255,255,0.05)" : "rgba(100, 255, 218, 0.1)",
                                     }}
                                   >
                                     {renderIcon(item.icon, item.comingSoon)}
@@ -314,7 +314,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                       <div
                                         className="font-medium text-sm"
                                         style={{
-                                          color: item.comingSoon ? "#6C737A" : "#111827",
+                                          color: item.comingSoon ? "#94a3b8" : "#ffffff",
                                         }}
                                       >
                                         {item.label}
@@ -323,8 +323,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                         <span
                                           className="px-1.5 py-0.5 text-xs font-medium rounded"
                                           style={{
-                                            backgroundColor: "#F8F9FA",
-                                            color: "#6C737A",
+                                            backgroundColor: "rgba(255,255,255,0.05)",
+                                            color: "#94a3b8",
                                           }}
                                         >
                                           Soon
@@ -333,7 +333,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                     </div>
                                     <div
                                       className="text-xs mt-0.5 leading-tight"
-                                      style={{ color: "#6C737A" }}
+                                      style={{ color: "#94a3b8" }}
                                     >
                                       {item.description}
                                     </div>
@@ -349,26 +349,22 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                     <motion.button
                       onClick={() => handleNavigationAction(link.action)}
                       className="text-sm font-medium transition-all duration-200 py-2 px-3 rounded-full"
-                      style={{ color: "#6C737A" }}
+                      style={{ color: "#94a3b8" }}
                       whileHover={{
-                        backgroundColor: "#ECFDF5",
-                        color: "#10B981",
+                        backgroundColor: "rgba(100, 255, 218, 0.1)",
+                        color: "#64ffda",
                       }}
                     >
                       {link.label}
                     </motion.button>
                   ) : (
-                    <motion.a
-                      href={link.href}
-                      className="text-sm font-medium transition-all duration-200 py-2 px-3 rounded-full"
-                      style={{ color: "#6C737A" }}
-                      whileHover={{
-                        backgroundColor: "#ECFDF5",
-                        color: "#10B981",
-                      }}
+
+                    <Link
+                      href={link.href!}
+                      className="text-sm font-medium transition-all duration-200 py-2 px-3 rounded-full cursor-pointer text-slate-400 hover:bg-teal-500/10 hover:text-teal-400"
                     >
                       {link.label}
-                    </motion.a>
+                    </Link>
                   )}
                 </div>
               ))}
@@ -382,19 +378,19 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                     onClick={() => handleDropdownToggle("user")}
                     className="hidden md:flex items-center space-x-2 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-full"
                     style={{
-                      backgroundColor: activeDropdown === "user" ? "#ECFDF5" : "transparent",
-                      color: "#6C737A",
+                      backgroundColor: activeDropdown === "user" ? "rgba(100, 255, 218, 0.1)" : "transparent",
+                      color: "#94a3b8",
                     }}
                     whileHover={{
-                      backgroundColor: "#ECFDF5",
-                      color: "#10B981",
+                      backgroundColor: "rgba(100, 255, 218, 0.1)",
+                      color: "#64ffda",
                     }}
                   >
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: "#ECFDF5" }}
+                      style={{ backgroundColor: "rgba(100, 255, 218, 0.1)" }}
                     >
-                      <User className="w-4 h-4" style={{ color: "#10B981" }} />
+                      <User className="w-4 h-4" style={{ color: "#64ffda" }} />
                     </div>
                     <span className="max-w-24 truncate">{userDisplayName}</span>
                     <motion.div
@@ -409,24 +405,24 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                     {activeDropdown === "user" && (
                       <motion.div
                         ref={userDropdownRef}
-                        className="absolute top-full right-0 w-52 bg-white rounded-xl shadow-xl border border-slate-200 z-[60] mt-2 p-2"
+                        className="absolute top-full right-0 w-52 bg-navy-900 rounded-xl shadow-xl border border-slate-700 z-[60] mt-2 p-2"
                         initial={{ opacity: 0, y: 8, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.96 }}
                         transition={{ duration: 0.15 }}
                       >
-                        <div className="p-3 border-b border-slate-200">
-                          <div className="text-sm font-medium text-slate-900">
+                        <div className="p-3 border-b border-slate-700">
+                          <div className="text-sm font-medium text-white">
                             {user?.user_metadata?.full_name || userDisplayName}
                           </div>
-                          <div className="text-xs mt-0.5 truncate text-slate-600">
+                          <div className="text-xs mt-0.5 truncate text-slate-300">
                             {user?.email}
                           </div>
                         </div>
                         <motion.button
                           onClick={() => router.push('/profile-setup')}
-                          className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 rounded-lg m-1 text-slate-600"
-                          whileHover={{ backgroundColor: "#F8F9FA" }}
+                          className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 rounded-lg m-1 text-slate-300"
+                          whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                         >
                           <User className="w-4 h-4 mr-2" />
                           <span>My Profile</span>
@@ -434,8 +430,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                         <motion.button
                           onClick={handleSignOut}
                           disabled={isSigningOut}
-                          className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 disabled:opacity-50 rounded-lg m-1 text-slate-600"
-                          whileHover={{ backgroundColor: "#F8F9FA" }}
+                          className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 disabled:opacity-50 rounded-lg m-1 text-slate-300"
+                          whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                         >
                           <LogOut className="w-4 h-4 mr-2" />
                           <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
@@ -448,19 +444,19 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                 <>
                   <motion.button
                     onClick={() => router.push('/login')}
-                    className="hidden md:block text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-slate-600"
+                    className="hidden md:block text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-slate-300"
                     whileHover={{
-                      backgroundColor: "#ECFDF5",
-                      color: "#10B981",
+                      backgroundColor: "rgba(100, 255, 218, 0.1)",
+                      color: "#64ffda",
                     }}
                   >
                     Sign In
                   </motion.button>
                   <motion.button
                     onClick={() => router.push('/signup')}
-                    className="hidden md:flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-full transition-all duration-200 bg-slate-900 text-white"
+                    className="hidden md:flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-full transition-all duration-200 bg-teal-500 text-navy-900"
                     whileHover={{
-                      backgroundColor: "#1F2937",
+                      backgroundColor: "#0d9488",
                       scale: 1.02,
                     }}
                     whileTap={{ scale: 0.98 }}
@@ -474,10 +470,10 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               {/* Mobile menu button */}
               <motion.button
                 onClick={toggleMobileMenu}
-                className="md:hidden p-2 rounded-lg transition-all duration-200 text-slate-600"
+                className="md:hidden p-2 rounded-lg transition-all duration-200 text-slate-300"
                 whileHover={{
-                  backgroundColor: "#ECFDF5",
-                  color: "#10B981",
+                  backgroundColor: "rgba(100, 255, 218, 0.1)",
+                  color: "#64ffda",
                 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
@@ -514,7 +510,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
-                className="md:hidden border-t border-slate-200 py-4 space-y-3"
+                className="md:hidden border-t border-slate-700 py-4 space-y-3"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
@@ -531,9 +527,9 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                       <div>
                         <motion.button
                           onClick={() => handleDropdownToggle(link.label)}
-                          className="flex items-center justify-between w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-600"
+                          className="flex items-center justify-between w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-300"
                           style={{
-                            backgroundColor: activeDropdown === link.label ? "#ECFDF5" : "transparent",
+                            backgroundColor: activeDropdown === link.label ? "rgba(100, 255, 218, 0.1)" : "transparent",
                           }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -562,10 +558,9 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                     e.stopPropagation()
                                     handleMobilePlanSelection(item.planId, item.comingSoon)
                                   }}
-                                  className={`flex items-center space-x-3 p-2 w-full text-left rounded-lg transition-all duration-200 ${
-                                    item.comingSoon ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
-                                  }`}
-                                  style={{ backgroundColor: "#F8F9FA" }}
+                                  className={`flex items-center space-x-3 p-2 w-full text-left rounded-lg transition-all duration-200 ${item.comingSoon ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                                    }`}
+                                  style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                                   disabled={item.comingSoon}
                                   initial={{ opacity: 0, y: 5 }}
                                   animate={{ opacity: 1, y: 0 }}
@@ -575,7 +570,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                   <div
                                     className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                                     style={{
-                                      backgroundColor: item.comingSoon ? "#F1F3F4" : "#ECFDF5",
+                                      backgroundColor: item.comingSoon ? "rgba(255,255,255,0.1)" : "rgba(100, 255, 218, 0.1)",
                                     }}
                                   >
                                     {renderIcon(item.icon, item.comingSoon)}
@@ -586,7 +581,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                       <div
                                         className="font-medium text-xs"
                                         style={{
-                                          color: item.comingSoon ? "#6C737A" : "#111827",
+                                          color: item.comingSoon ? "#94a3b8" : "#ffffff",
                                         }}
                                       >
                                         {item.label}
@@ -595,15 +590,15 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                                         <span
                                           className="px-1.5 py-0.5 text-xs font-medium rounded"
                                           style={{
-                                            backgroundColor: "#E5E7EB",
-                                            color: "#6C737A",
+                                            backgroundColor: "rgba(255,255,255,0.1)",
+                                            color: "#94a3b8",
                                           }}
                                         >
                                           Soon
                                         </span>
                                       )}
                                     </div>
-                                    <div className="text-xs mt-0.5 leading-tight text-slate-600">
+                                    <div className="text-xs mt-0.5 leading-tight text-slate-300">
                                       {item.description}
                                     </div>
                                   </div>
@@ -616,28 +611,26 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                     ) : link.action ? (
                       <motion.button
                         onClick={() => handleMobileNavigationAction(link.action)}
-                        className="block w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-600"
+                        className="block w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-300"
                         whileTap={{ scale: 0.98 }}
-                        whileHover={{ backgroundColor: "#ECFDF5" }}
+                        whileHover={{ backgroundColor: "rgba(100, 255, 218, 0.1)" }}
                       >
                         {link.label}
                       </motion.button>
                     ) : (
-                      <motion.a
-                        href={link.href}
-                        className="block text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-600"
-                        whileTap={{ scale: 0.98 }}
-                        whileHover={{ backgroundColor: "#ECFDF5" }}
+                      <Link
+                        href={link.href!}
+                        className="block text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-300 hover:bg-teal-500/10 hover:text-teal-400"
                       >
                         {link.label}
-                      </motion.a>
+                      </Link>
                     )}
                   </motion.div>
                 ))}
 
                 {/* Mobile Auth Section */}
                 <motion.div
-                  className="pt-3 border-t border-slate-200 space-y-2"
+                  className="pt-3 border-t border-slate-700 space-y-2"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: 0.3 }}
@@ -647,15 +640,15 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                       <div className="flex items-center space-x-3 py-2 px-3">
                         <div
                           className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: "#ECFDF5" }}
+                          style={{ backgroundColor: "rgba(100, 255, 218, 0.1)" }}
                         >
-                          <User className="w-4 h-4" style={{ color: "#10B981" }} />
+                          <User className="w-4 h-4" style={{ color: "#64ffda" }} />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-slate-900">
+                          <div className="text-sm font-medium text-white">
                             {user?.user_metadata?.full_name || userDisplayName}
                           </div>
-                          <div className="text-xs text-slate-600 truncate">
+                          <div className="text-xs text-slate-300 truncate">
                             {user?.email}
                           </div>
                         </div>
@@ -665,8 +658,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                           router.push('/profile-setup')
                           setIsMobileMenuOpen(false)
                         }}
-                        className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 rounded-lg text-slate-600"
-                        whileHover={{ backgroundColor: "#F8F9FA" }}
+                        className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 rounded-lg text-slate-300"
+                        whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                       >
                         <User className="w-4 h-4 mr-2" />
                         <span>My Profile</span>
@@ -674,8 +667,8 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                       <motion.button
                         onClick={handleSignOut}
                         disabled={isSigningOut}
-                        className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 disabled:opacity-50 rounded-lg text-slate-600"
-                        whileHover={{ backgroundColor: "#F8F9FA" }}
+                        className="flex items-center w-full px-3 py-2 text-sm transition-all duration-150 disabled:opacity-50 rounded-lg text-slate-300"
+                        whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
@@ -688,9 +681,9 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                           router.push('/login')
                           setIsMobileMenuOpen(false)
                         }}
-                        className="block w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-600"
+                        className="block w-full text-left text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 text-slate-300"
                         whileTap={{ scale: 0.98 }}
-                        whileHover={{ backgroundColor: "#ECFDF5" }}
+                        whileHover={{ backgroundColor: "rgba(100, 255, 218, 0.1)" }}
                       >
                         Sign In
                       </motion.button>
@@ -699,9 +692,9 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                           router.push('/signup')
                           setIsMobileMenuOpen(false)
                         }}
-                        className="flex items-center justify-center gap-2 w-full text-sm font-medium py-2 px-4 rounded-lg transition-all duration-200 bg-slate-900 text-white"
+                        className="flex items-center justify-center gap-2 w-full text-sm font-medium py-2 px-4 rounded-lg transition-all duration-200 bg-teal-500 text-navy-900"
                         whileTap={{ scale: 0.98 }}
-                        whileHover={{ backgroundColor: "#1F2937" }}
+                        whileHover={{ backgroundColor: "#0d9488" }}
                       >
                         <Target className="w-4 h-4" />
                         <span>Get Started</span>
@@ -711,9 +704,9 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                 </motion.div>
               </motion.div>
             )}
-          </AnimatePresence>
-        </div>
-      </header>
+          </AnimatePresence >
+        </div >
+      </header >
     </>
   )
 }

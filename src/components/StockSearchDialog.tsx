@@ -59,15 +59,15 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`
       }
-      
+
       const response = await fetch(`/api/stocks/quote?symbol=${stock.symbol}`, { headers })
       if (!response.ok) {
         throw new Error(`Failed to fetch price: ${response.status}`)
       }
-      
+
       const data = await response.json()
       console.log(`Fetched price for ${stock.symbol}:`, data)
-      
+
       setSelectedStock({
         ...stock,
         price: data.price,
@@ -122,7 +122,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
 
       console.log('Stock added to portfolio successfully')
       alert(`Successfully added ${buyData.quantity} shares of ${selectedStock.symbol}!`)
-      
+
       onStockAdded?.()
       onClose()
     } catch (error) {
@@ -135,7 +135,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-md border border-slate-200 shadow-lg">
+      <div className="bg-navy-900 border-slate-700 shadow-2xl">
         <div className="p-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -144,7 +144,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search stocks..."
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full pl-10 pr-4 py-3 bg-navy-800 border-slate-700 text-white placeholder-slate-400 focus:border-teal-500 focus:ring-teal-500"
               autoFocus
             />
           </div>
@@ -153,20 +153,20 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
             {isLoading && !selectedStock && (
               <div className="text-center py-4 text-slate-400">Searching...</div>
             )}
-            
+
             {!isLoading && results.length === 0 && query && (
               <div className="text-center py-4 text-slate-400">No results found</div>
             )}
 
             {selectedStock && (
-              <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                <p className="font-semibold text-slate-900 mb-1">{selectedStock.symbol}</p>
-                <p className="text-sm text-slate-600 mb-3">{selectedStock.name}</p>
+              <div className="p-4 bg-teal-400/10 border-teal-400/20">
+                <p className="font-semibold text-white mb-1">{selectedStock.symbol}</p>
+                <p className="text-sm text-slate-400 mb-3">{selectedStock.name}</p>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-2xl font-bold text-white">
                     ₹{selectedStock.price?.toFixed(2) || '0.00'}
                   </p>
-                  <div className={`flex items-center gap-1 text-sm font-medium ${selectedStock.changePercent! >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${selectedStock.changePercent! >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                     {selectedStock.changePercent! >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                     {selectedStock.changePercent! >= 0 ? '+' : ''}{selectedStock.changePercent?.toFixed(2)}%
                   </div>
@@ -175,14 +175,14 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                 {!showBuyForm ? (
                   <Button
                     onClick={() => setShowBuyForm(true)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="w-full bg-teal-500 hover:bg-teal-600 text-navy-900"
                   >
                     Add to Portfolio
                   </Button>
                 ) : (
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-slate-700">Quantity</label>
+                      <label className="text-sm font-medium text-slate-300">Quantity</label>
                       <input
                         type="number"
                         min="1"
@@ -192,7 +192,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-700">Purchase Price (₹)</label>
+                      <label className="text-sm font-medium text-slate-300">Purchase Price (₹)</label>
                       <input
                         type="number"
                         min="0.01"
@@ -203,7 +203,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-700">Purchase Date</label>
+                      <label className="text-sm font-medium text-slate-300">Purchase Date</label>
                       <input
                         type="date"
                         value={buyData.date}
@@ -215,7 +215,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                       <Button
                         onClick={handleBuyStock}
                         disabled={isBuying}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                        className="w-full bg-teal-500 hover:bg-teal-600 text-navy-900"
                       >
                         {isBuying ? 'Adding...' : 'Confirm Purchase'}
                       </Button>
@@ -236,10 +236,10 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
               <button
                 key={result.symbol}
                 onClick={() => handleSelectStock(result)}
-                className="w-full text-left p-3 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+                className="w-full text-left p-3 hover:bg-navy-800 border-slate-700"
               >
-                <div className="font-medium text-slate-900">{result.symbol}</div>
-                <div className="text-sm text-slate-600">{result.name}</div>
+                <div className="font-medium text-white">{result.symbol}</div>
+                <div className="text-sm text-slate-400">{result.name}</div>
               </button>
             ))}
           </div>

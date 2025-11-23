@@ -19,6 +19,7 @@ import { getPopularStocks, getStockQuote, getPredictData } from '@/lib/stocks'
 import type { UserProfile, Portfolio } from '@/types'
 import type { StockQuote, PredictResponse } from '@/lib/stocks'
 import Header from '@/components/Header'
+import { DashboardLoader } from '@/components/DashboardLoader'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -397,11 +398,7 @@ export default function Dashboard() {
   const totalGainPercent = totalCost > 0 ? (totalGain / totalCost) * 100 : 0
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900"></div>
-      </div>
-    )
+    return <DashboardLoader />
   }
 
   const generateChartData = () => {
@@ -441,7 +438,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-navy-900">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-8">
@@ -452,57 +449,57 @@ export default function Dashboard() {
           className="space-y-6"
         >
           <motion.div variants={itemVariants} className="mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
               Portfolio
             </h2>
-            <p className="text-slate-600 text-lg">
-              Risk Score: <span className="text-blue-600 font-semibold">{profile?.risk_score}</span> • <span className="text-blue-600 font-semibold">{profile?.age}</span> years old
+            <p className="text-slate-400 text-lg">
+              Risk Score: <span className="text-teal-400 font-semibold">{profile?.risk_score}</span> • <span className="text-teal-400 font-semibold">{profile?.age}</span> years old
             </p>
           </motion.div>
 
           <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-slate-600 font-medium text-sm">Portfolio Value</h3>
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-blue-600" />
+                <h3 className="text-slate-400 font-medium text-sm">Portfolio Value</h3>
+                <div className="bg-teal-400/10 p-2 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-slate-900 mb-3">
+              <div className="text-4xl font-bold text-white mb-3">
                 ₹{(totalPortfolioValue / 100000).toFixed(2)}L
               </div>
-              <div className={`text-sm font-medium flex items-center ${totalGain >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              <div className={`text-sm font-medium flex items-center ${totalGain >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                 {totalGain >= 0 ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
                 {totalGain >= 0 ? '+' : ''}₹{Math.abs(totalGain).toFixed(0)} ({totalGainPercent.toFixed(2)}%)
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-slate-600 font-medium text-sm">Total Invested</h3>
-                <div className="bg-emerald-100 p-2 rounded-lg">
-                  <Activity className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-slate-400 font-medium text-sm">Total Invested</h3>
+                <div className="bg-teal-400/10 p-2 rounded-lg">
+                  <Activity className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-slate-900 mb-3">
+              <div className="text-4xl font-bold text-white mb-3">
                 ₹{(totalCost / 100000).toFixed(2)}L
               </div>
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-slate-400">
                 Base investment
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-slate-600 font-medium text-sm">Holdings</h3>
-                <div className="bg-purple-100 p-2 rounded-lg">
-                  <Target className="w-5 h-5 text-purple-600" />
+                <h3 className="text-slate-400 font-medium text-sm">Holdings</h3>
+                <div className="bg-purple-400/10 p-2 rounded-lg">
+                  <Target className="w-5 h-5 text-purple-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-slate-900 mb-3">
+              <div className="text-4xl font-bold text-white mb-3">
                 {holdings.length}
               </div>
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-slate-400">
                 Active stocks
               </div>
             </div>
@@ -510,24 +507,24 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-slate-900 font-semibold mb-6 text-lg flex items-center">
-              <LineChart className="w-5 h-5 mr-2 text-blue-600" />
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <h3 className="text-white font-semibold mb-6 text-lg flex items-center">
+              <LineChart className="w-5 h-5 mr-2 text-teal-400" />
               Portfolio Performance
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#64ffda" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#64ffda" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-                <XAxis dataKey="day" stroke="rgba(0,0,0,0.3)" />
-                <YAxis stroke="rgba(0,0,0,0.3)" />
-                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#000' }} />
-                <Area type="monotone" dataKey="value" stroke="#2563eb" fillOpacity={1} fill="url(#colorValue)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="day" stroke="rgba(255,255,255,0.3)" />
+                <YAxis stroke="rgba(255,255,255,0.3)" />
+                <Tooltip contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
+                <Area type="monotone" dataKey="value" stroke="#64ffda" fillOpacity={1} fill="url(#colorValue)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -535,13 +532,13 @@ export default function Dashboard() {
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <h3 className="text-2xl font-bold text-slate-900 flex items-center">
-              <BarChart3 className="w-6 h-6 mr-2 text-blue-600" />
+            <h3 className="text-2xl font-bold text-white flex items-center">
+              <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
               Market Trends
             </h3>
             <Button
               onClick={() => setShowSearch(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-xl font-medium"
+              className="bg-teal-500 hover:bg-teal-600 text-navy-900 border-0 rounded-xl font-medium"
             >
               <Search className="w-4 h-4 mr-2" />
               Add Stock
@@ -553,22 +550,22 @@ export default function Dashboard() {
               <motion.div
                 key={stock.symbol}
                 variants={itemVariants}
-                className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition duration-300"
+                className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-xl p-4 shadow-sm hover:shadow-md transition duration-300"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-slate-900 font-semibold text-lg">{stock.symbol}</p>
-                    <p className="text-slate-600 text-sm">{stock.name}</p>
+                    <p className="text-white font-semibold text-lg">{stock.symbol}</p>
+                    <p className="text-slate-400 text-sm">{stock.name}</p>
                   </div>
                   {stock.change >= 0 ? (
-                    <TrendingUp className="w-5 h-5 text-emerald-600" />
+                    <TrendingUp className="w-5 h-5 text-teal-400" />
                   ) : (
-                    <TrendingDown className="w-5 h-5 text-red-600" />
+                    <TrendingDown className="w-5 h-5 text-rose-400" />
                   )}
                 </div>
                 <div className="mb-3">
-                  <p className="text-2xl font-bold text-slate-900">₹{stock.price.toFixed(0)}</p>
-                  <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <p className="text-2xl font-bold text-white">₹{stock.price.toFixed(0)}</p>
+                  <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                     {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                   </p>
                 </div>
@@ -578,9 +575,9 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-          <h3 className="text-2xl font-bold text-slate-900 mb-6">Manage Portfolio</h3>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <PortfolioUpdater 
+          <h3 className="text-2xl font-bold text-white mb-6">Manage Portfolio</h3>
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <PortfolioUpdater
               holdings={holdings}
               onUpdate={reloadPortfolioData}
               authToken={authToken}
@@ -589,38 +586,38 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.5 }}>
-          <h3 className="text-2xl font-bold text-slate-900 mb-6">Holdings & Performance</h3>
+          <h3 className="text-2xl font-bold text-white mb-6">Holdings & Performance</h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-slate-900">Holdings</h4>
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <Activity className="w-5 h-5 text-blue-600" />
+                <h4 className="text-lg font-semibold text-white">Holdings</h4>
+                <div className="bg-teal-400/10 p-2 rounded-lg">
+                  <Activity className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <PortfolioManager 
+              <PortfolioManager
                 holdings={holdings}
                 onStockRemoved={reloadPortfolioData}
                 authToken={authToken}
               />
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-emerald-600" />
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-teal-400" />
                 Live Prices
               </h4>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {customStocks.map((stock) => (
-                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-navy-800/50 rounded-lg border border-slate-700/50 hover:bg-navy-800 transition">
                     <div>
-                      <p className="text-slate-900 font-medium">{stock.symbol}</p>
-                      <p className="text-slate-600 text-sm">{stock.name}</p>
+                      <p className="text-white font-medium">{stock.symbol}</p>
+                      <p className="text-slate-400 text-sm">{stock.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-slate-900 font-semibold">₹{stock.price.toFixed(0)}</p>
-                      <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      <p className="text-white font-semibold">₹{stock.price.toFixed(0)}</p>
+                      <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                         {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                       </p>
                     </div>
@@ -629,9 +626,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-                <LineChart className="w-5 h-5 mr-2 text-blue-600" />
+            <div className="lg:col-span-2 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <LineChart className="w-5 h-5 mr-2 text-teal-400" />
                 Profit/Loss Summary
               </h4>
               {profitLoss ? (
@@ -645,75 +642,75 @@ export default function Dashboard() {
                             : 0
                           const profitPercent = totalInvested > 0 ? (stock.profit / totalInvested) * 100 : 0
                           return (
-                            <div key={stock.symbol} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div key={stock.symbol} className="p-3 bg-navy-800/50 rounded-lg border border-slate-700/50">
                               <div className="flex items-center justify-between mb-2">
-                                <p className="text-slate-900 font-medium">{stock.symbol}</p>
-                                <p className={`text-sm font-bold ${stock.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                <p className="text-white font-medium">{stock.symbol}</p>
+                                <p className={`text-sm font-bold ${stock.profit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                                   {stock.profit >= 0 ? '+' : ''}₹{Math.abs(stock.profit).toFixed(0)}
                                 </p>
                               </div>
-                              <p className={`text-xs ${profitPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                              <p className={`text-xs ${profitPercent >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                                 {profitPercent >= 0 ? '+' : ''}{profitPercent.toFixed(2)}%
                               </p>
                             </div>
                           )
                         })}
                       </div>
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 mt-4">
-                        <p className="text-slate-600 text-sm font-medium">Total Profit/Loss</p>
+                      <div className="p-4 bg-teal-400/10 rounded-lg border border-teal-400/20 mt-4">
+                        <p className="text-slate-400 text-sm font-medium">Total Profit/Loss</p>
                         <div className="flex items-baseline justify-between mt-2">
-                          <p className={`text-3xl font-bold ${profitLoss.totalProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          <p className={`text-3xl font-bold ${profitLoss.totalProfit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                             {profitLoss.totalProfit >= 0 ? '+' : ''}₹{Math.abs(profitLoss.totalProfit).toFixed(0)}
                           </p>
-                          <p className={`text-lg font-semibold ${profitLoss.percentage >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          <p className={`text-lg font-semibold ${profitLoss.percentage >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                             {profitLoss.percentage >= 0 ? '+' : ''}{profitLoss.percentage.toFixed(2)}%
                           </p>
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="text-slate-600 text-sm p-4 bg-slate-50 rounded-lg">
+                    <div className="text-slate-400 text-sm p-4 bg-slate-50 rounded-lg">
                       No profit/loss data available
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-slate-600 text-sm">Loading profit/loss data...</div>
+                <div className="text-slate-400 text-sm">Loading profit/loss data...</div>
               )}
             </div>
           </div>
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.6 }}>
-          <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-            <Target className="w-6 h-6 mr-2 text-purple-600" />
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Target className="w-6 h-6 mr-2 text-purple-400" />
             Investment Planning
           </h3>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
             <ProjectionCalculator holdings={holdings} />
           </div>
         </motion.div>
 
         {predictData && (
           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.7 }}>
-            <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-              <BarChart3 className="w-6 h-6 mr-2 text-blue-600" />
+            <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
               AI-Powered Strategy
             </h3>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h4 className="text-lg font-semibold text-slate-900 mb-6">Asset Allocation</h4>
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+                <h4 className="text-lg font-semibold text-white mb-6">Asset Allocation</h4>
                 <div className="space-y-4">
                   {Object.entries(predictData.ai_strategy).map(([asset, allocation]) => (
                     <div key={asset}>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-slate-700 font-medium">{asset}</p>
-                        <p className="text-blue-600 font-semibold">{(allocation as number * 100).toFixed(1)}%</p>
+                        <p className="text-slate-300 font-medium">{asset}</p>
+                        <p className="text-teal-400 font-semibold">{(allocation as number * 100).toFixed(1)}%</p>
                       </div>
-                      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+                      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full"
                           style={{ width: `${(allocation as number * 100)}%` }}
                         ></div>
                       </div>
@@ -722,18 +719,18 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h4 className="text-lg font-semibold text-slate-900 mb-6">Recommendations</h4>
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+                <h4 className="text-lg font-semibold text-white mb-6">Recommendations</h4>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {predictData.final_recommendation.map((rec, index) => (
-                    <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+                    <div key={index} className="p-4 bg-navy-800/50 rounded-lg border border-slate-700/50 hover:bg-navy-800 transition">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-slate-900 font-semibold">{rec.Asset}</p>
-                        <span className="text-emerald-600 font-bold">{(rec.Allocation * 100).toFixed(1)}%</span>
+                        <p className="text-white font-semibold">{rec.Asset}</p>
+                        <span className="text-teal-400 font-bold">{(rec.Allocation * 100).toFixed(1)}%</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {rec.Tickers.map((ticker) => (
-                          <span key={ticker} className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full border border-blue-300">
+                          <span key={ticker} className="text-xs bg-teal-400/10 text-blue-700 px-3 py-1 rounded-full border border-blue-300">
                             {ticker}
                           </span>
                         ))}
@@ -744,31 +741,31 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h4 className="text-lg font-semibold text-slate-900 mb-6 flex items-center">
-                <Activity className="w-5 h-5 mr-2 text-blue-600" />
+            <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+              <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
+                <Activity className="w-5 h-5 mr-2 text-teal-400" />
                 Investor Profile
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <p className="text-slate-600 text-xs font-medium mb-2">Age</p>
-                  <p className="text-slate-900 font-bold text-2xl">{predictData.user_profile.Age}</p>
+                <div className="p-4 bg-teal-400/10 rounded-xl border border-teal-400/20">
+                  <p className="text-slate-400 text-xs font-medium mb-2">Age</p>
+                  <p className="text-white font-bold text-2xl">{predictData.user_profile.Age}</p>
                 </div>
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                  <p className="text-slate-600 text-xs font-medium mb-2">Risk Score</p>
-                  <p className="text-slate-900 font-bold text-2xl">{predictData.user_profile.RiskScore}</p>
+                <div className="p-4 bg-emerald-400/10 rounded-xl border border-emerald-400/20">
+                  <p className="text-slate-400 text-xs font-medium mb-2">Risk Score</p>
+                  <p className="text-white font-bold text-2xl">{predictData.user_profile.RiskScore}</p>
                 </div>
-                <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
-                  <p className="text-slate-600 text-xs font-medium mb-2">Horizon (yr)</p>
-                  <p className="text-slate-900 font-bold text-2xl">{predictData.user_profile.InvestmentHorizon}</p>
+                <div className="p-4 bg-purple-400/10 rounded-xl border border-purple-400/20">
+                  <p className="text-slate-400 text-xs font-medium mb-2">Horizon (yr)</p>
+                  <p className="text-white font-bold text-2xl">{predictData.user_profile.InvestmentHorizon}</p>
                 </div>
-                <div className="p-4 bg-orange-50 rounded-xl border border-orange-200">
-                  <p className="text-slate-600 text-xs font-medium mb-2">Dependents</p>
-                  <p className="text-slate-900 font-bold text-2xl">{predictData.user_profile.Dependents}</p>
+                <div className="p-4 bg-orange-400/10 rounded-xl border border-orange-400/20">
+                  <p className="text-slate-400 text-xs font-medium mb-2">Dependents</p>
+                  <p className="text-white font-bold text-2xl">{predictData.user_profile.Dependents}</p>
                 </div>
-                <div className="p-4 bg-pink-50 rounded-xl border border-pink-200">
-                  <p className="text-slate-600 text-xs font-medium mb-2">Annual Income</p>
-                  <p className="text-slate-900 font-bold text-xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
+                <div className="p-4 bg-pink-400/10 rounded-xl border border-pink-400/20">
+                  <p className="text-slate-400 text-xs font-medium mb-2">Annual Income</p>
+                  <p className="text-white font-bold text-xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
                 </div>
               </div>
             </div>

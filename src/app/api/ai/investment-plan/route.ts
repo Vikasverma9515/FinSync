@@ -1,7 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,41 +18,90 @@ export async function POST(request: NextRequest) {
       currentPortfolio,
     } = body;
 
-    const prompt = `You are an investment advisor. Create a detailed investment plan based on these inputs:
+    const riskLevel = riskScore <= 3 ? 'low' : riskScore <= 6 ? 'medium' : 'high';
+    const monthlyInvestmentCapacity = investmentAmount / timeHorizon / 12;
+    
+    const prompt = `You are an expert Indian financial advisor with deep knowledge of the Indian stock market, mutual funds, tax implications, and wealth management.
+
+INVESTOR PROFILE:
 - Age: ${age} years
-- Risk Score: ${riskScore}/10
-- Investment Amount: ₹${investmentAmount}
-- Time Horizon: ${timeHorizon} years
+- Risk Tolerance Score: ${riskScore}/10 (${riskLevel} risk)
+- Initial Investment Amount: ₹${investmentAmount.toLocaleString()}
+- Investment Horizon: ${timeHorizon} years
 - Investment Goal: ${investmentGoal}
-- Current Portfolio Value: ₹${currentPortfolio || 0}
+- Current Portfolio Value: ₹${currentPortfolio?.toLocaleString() || '0'}
+- Implied Monthly Investment Capacity: ₹${monthlyInvestmentCapacity.toFixed(0).toLocaleString()}
 
-Based on Indian market context, please provide:
-1. Asset allocation recommendations (stocks, bonds, mutual funds, fixed deposits, real estate)
-2. Specific stock recommendations with allocation percentages
-3. Expected return projections
-4. Risk assessment and mitigation strategies
-5. Diversification recommendations
-6. Quarterly rebalancing suggestions
+Create a HIGHLY DETAILED, PERSONALIZED investment plan with SPECIFIC numbers and actionable advice:
 
-Format the response as JSON with these fields:
+KEY REQUIREMENTS:
+1. Provide SPECIFIC rupee amounts for each asset class allocation
+2. Include concrete wealth projections for years 1, 3, 5, and ${timeHorizon}
+3. Recommend EXACT monthly/lump-sum investment amounts
+4. Give at least 5-7 specific stock recommendations with detailed reasoning
+5. Calculate expected returns with specific numbers (not ranges)
+6. Provide tax-efficient strategies for their profile
+7. Include risk mitigation with specific percentages in debt/FDs
+
+Respond ONLY with valid JSON in this format:
 {
-  "portfolio": [{"symbol": string, "name": string, "allocation": number, "reason": string, "expectedReturn": number}],
-  "assetAllocation": {"stocks": number, "bonds": number, "mutualFunds": number, "fixedDeposits": number, "others": number},
-  "summary": string,
-  "expectedAnnualReturn": number,
-  "riskLevel": "low|medium|high",
-  "recommendations": [string],
-  "riskMitigation": [string]
+  "portfolio": [
+    {"symbol": "TCS.NS", "name": "Stock Name", "allocation": 20, "reason": "Specific reason tailored to their ${timeHorizon}-year ${riskLevel} risk profile", "expectedReturn": 14}
+  ],
+  "assetAllocation": {"stocks": 70, "bonds": 15, "mutualFunds": 0, "fixedDeposits": 15, "others": 0},
+  "monthlyInvestmentPlan": {
+    "lumpSum": ${investmentAmount},
+    "monthlyAmount": ${monthlyInvestmentCapacity.toFixed(0)},
+    "expectedWealthIn1Year": "Calculated amount in ₹",
+    "expectedWealthIn3Years": "Calculated amount in ₹",
+    "expectedWealthIn5Years": "Calculated amount in ₹",
+    "expectedWealthInFinalYear": "Amount in ₹ after ${timeHorizon} years"
+  },
+  "summary": "Detailed 3-4 sentence summary explaining their specific wealth accumulation path with numbers",
+  "expectedAnnualReturn": 12,
+  "riskLevel": "${riskLevel}",
+  "recommendations": [
+    "Specific actionable step 1 with numbers/timeline",
+    "Specific actionable step 2 with numbers/timeline",
+    "At least 5-7 concrete recommendations"
+  ],
+  "riskMitigation": [
+    "Keep ₹X (${Math.floor(monthlyInvestmentCapacity * 6)} - 6 months expenses) in emergency fund",
+    "Allocate 15% to fixed deposits for stability",
+    "Specific risk mitigation strategies based on their ${riskLevel} profile"
+  ],
+  "taxStrategy": "Specific tax-saving recommendations for their profile"
 }`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    const response = await client.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
 
-    // Parse JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const text = response.choices[0]?.message?.content || "";
+    
+    console.log('Raw investment plan response from Groq:', text.substring(0, 500));
+
+    // Parse JSON from response - handle markdown code blocks
+    let jsonText = text;
+    
+    // Remove markdown code blocks if present
+    const codeBlockMatch = text.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
+    if (codeBlockMatch) {
+      jsonText = codeBlockMatch[1];
+    }
+    
+    // Try to extract JSON object
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('Failed to extract JSON from investment plan response. Full text:', text);
       throw new Error("No JSON found in response");
     }
 

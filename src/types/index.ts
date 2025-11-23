@@ -102,6 +102,18 @@ export interface InvestmentPlanOutput {
     sector: string
     reasoning: string
   }>
+  allocation: Array<{
+    assetClass: string
+    percentage: number
+    reasoning: string
+  }>
+  suggestions: Array<{
+    name: string
+    type: string
+    description: string
+    expectedReturn: string
+    riskLevel: string
+  }>
   steps: InvestmentPlanStep[]
   summary: string
   status: 'ok' | 'warning' | 'error'
@@ -173,4 +185,57 @@ export interface FinancialCoachMessage {
   content: string
   timestamp: string
   suggestions?: string[]
+}
+
+// Tax Saver Planner Types
+export interface TaxSaverQuestionnaireData {
+  annualIncome: number
+  employmentType: 'salaried' | 'business' | 'freelancer'
+  investments80C: number
+  healthInsurance80D: number
+  homeLoanInterest: number
+  rentPaid: number
+  age: number
+  hasParents: boolean
+  city: 'metro' | 'non-metro'
+  targetSavings?: number
+  investmentPreference: 'safe' | 'balanced' | 'growth'
+}
+
+export interface TaxDeduction {
+  section: string
+  utilized: number
+  remaining: number
+  limit: number
+  recommendations: string[]
+}
+
+export interface TaxRecommendation {
+  title: string
+  description: string
+  amount: number
+  taxSaving: number
+  category: string
+}
+
+export interface MonthlyTaxPlan {
+  month: string
+  action: string
+  amount: number
+}
+
+export interface TaxSaverPlanOutput {
+  currentTax: number
+  optimizedTax: number
+  totalSavings: number
+  taxBreakdown: {
+    slab: string
+    rate: number
+    amount: number
+  }[]
+  deductions: TaxDeduction[]
+  monthlyPlan: MonthlyTaxPlan[]
+  recommendations: TaxRecommendation[]
+  summary: string
+  status: 'ok' | 'warning' | 'error'
 }
