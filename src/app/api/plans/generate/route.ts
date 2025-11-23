@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const plan = generateInvestmentPlan(profile)
+    const plan = await generateInvestmentPlan(profile)
 
     const { error: insertError } = await supabase
       .from('investment_plans')

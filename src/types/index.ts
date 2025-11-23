@@ -32,6 +32,7 @@ export interface Portfolio {
   quantity: number
   average_price: number
   current_price: number
+  purchase_date?: string
   created_at: string
   updated_at: string
 }

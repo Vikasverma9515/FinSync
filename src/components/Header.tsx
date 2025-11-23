@@ -46,7 +46,8 @@ const getNavigationLinks = (user: any): NavigationLink[] => {
     // Logged in user navigation
     return [
       { label: "Dashboard", action: "dashboard" },
-      { label: "All Changes", action: "changes" },
+      { label: "Investment Planner", action: "investmentplanner" },
+      { label: "Financial Freedom", action: "financialfreedom" },
     ]
   } else {
     // Guest user navigation
@@ -170,8 +171,11 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
       case "dashboard":
         router.push('/dashboard')
         break
-      case "changes":
-        router.push('/dashboard/changes')
+      case "investmentplanner":
+        router.push('/plans')
+        break
+      case "financialfreedom":
+        router.push('/plans')
         break
       default:
         break

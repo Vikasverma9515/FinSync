@@ -27,23 +27,79 @@ function getRiskToleranceFromScore(riskScore: number): 'low' | 'medium' | 'high'
   return 'high'
 }
 
-export function generateInvestmentPlan(profile: UserProfile): InvestmentPlanRecommendation {
-  const riskTolerance = getRiskToleranceFromScore(profile.risk_score)
+export async function generateInvestmentPlan(
+  profile: UserProfile
+): Promise<InvestmentPlanRecommendation> {
+  try {
+    // Call Gemini AI API to generate the plan
+    const response = await fetch('/api/ai/investment-plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        age: profile.age,
+        riskScore: profile.risk_score,
+        investmentAmount: profile.total_net_worth || 0,
+        timeHorizon: 10,
+        investmentGoal: 'Long-term wealth creation',
+        currentPortfolio: profile.total_net_worth || 0,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to generate plan from Gemini AI')
+    }
+
+    const aiData = await response.json()
+
+    const portfolio: RecommendedAsset[] = (aiData.portfolio || []).map((asset: any) => ({
+      symbol: asset.symbol,
+      name: asset.name,
+      allocation: asset.allocation,
+      reason: asset.reason,
+    }))
+
+    const riskTolerance = getRiskToleranceFromScore(profile.risk_score)
+
+    return {
+      portfolio: portfolio.length > 0 ? portfolio : generateFallbackPortfolio(profile, riskTolerance),
+      summary: aiData.summary || generateSummary(profile, riskTolerance),
+      riskLevel: aiData.riskLevel || riskTolerance,
+    }
+  } catch (error) {
+    console.error('Error generating investment plan with Gemini AI, falling back to local generation:', error)
+
+    // Fallback to local generation
+    const riskTolerance = getRiskToleranceFromScore(profile.risk_score)
+    const allocations = getAllocationByRisk(riskTolerance, profile.age)
+    const selectedStocks = selectStocksForRisk(riskTolerance)
+
+    const portfolio: RecommendedAsset[] = selectedStocks.map((stock, index) => ({
+      symbol: stock,
+      name: stock,
+      allocation: allocations[index],
+      reason: getReasonForStock(stock, riskTolerance),
+    }))
+
+    return {
+      portfolio,
+      summary: generateSummary(profile, riskTolerance),
+      riskLevel: riskTolerance,
+    }
+  }
+}
+
+function generateFallbackPortfolio(profile: UserProfile, riskTolerance: 'low' | 'medium' | 'high'): RecommendedAsset[] {
   const allocations = getAllocationByRisk(riskTolerance, profile.age)
   const selectedStocks = selectStocksForRisk(riskTolerance)
 
-  const portfolio: RecommendedAsset[] = selectedStocks.map((stock, index) => ({
+  return selectedStocks.map((stock, index) => ({
     symbol: stock,
     name: stock,
     allocation: allocations[index],
     reason: getReasonForStock(stock, riskTolerance),
   }))
-
-  return {
-    portfolio,
-    summary: generateSummary(profile, riskTolerance),
-    riskLevel: riskTolerance,
-  }
 }
 
 function getAllocationByRisk(

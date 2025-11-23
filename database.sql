@@ -31,6 +31,7 @@ CREATE TABLE portfolios (
   quantity INTEGER NOT NULL CHECK (quantity > 0),
   average_price DECIMAL(15,2) NOT NULL CHECK (average_price > 0),
   current_price DECIMAL(15,2),
+  purchase_date TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, symbol)

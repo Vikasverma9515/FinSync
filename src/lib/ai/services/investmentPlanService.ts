@@ -1,14 +1,9 @@
 /**
  * Investment Plan AI Service
- * Handles personalized investment plan generation using OpenRouter AI
+ * Handles personalized investment plan generation using Gemini AI
  */
 
-import { openRouterProvider, type OpenRouterRequest } from '../providers/openRouterProvider';
-import {
-  INVESTMENT_PLAN_SYSTEM_PROMPT,
-  createInvestmentPlanPrompt,
-  INVESTMENT_PLAN_SCHEMA
-} from '../prompts/investmentPlanPrompts';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { InvestmentQuestionnaireData, UserProfile, InvestmentPlanOutput } from '../../../types';
 
 export interface AIConfig {
@@ -31,7 +26,7 @@ export interface AIResponse<T = any> {
 
 class InvestmentPlanService {
   private config: AIConfig = {
-    model: 'z-ai/glm-4.5-air:free',
+    model: 'gemini-pro',
     temperature: 0.7,
     maxTokens: 3000,
   };
@@ -44,39 +39,25 @@ class InvestmentPlanService {
     userProfile?: UserProfile
   ): Promise<AIResponse<InvestmentPlanOutput>> {
     const startTime = Date.now();
-    let result: any;
 
     try {
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
+      const model = genAI.getGenerativeModel({ model: this.config.model });
+
       // Create the prompt
-      const userPrompt = createInvestmentPlanPrompt(questionnaireData, userProfile);
+      const userPrompt = this.createInvestmentPrompt(questionnaireData, userProfile);
 
-      // Create OpenRouter request
-      const request: OpenRouterRequest = {
-        messages: [
-          { role: 'system', content: INVESTMENT_PLAN_SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        model: this.config.model,
-        temperature: this.config.temperature,
-        max_tokens: this.config.maxTokens,
-        response_format: { type: 'json_object' },
-      };
+      const result = await model.generateContent(userPrompt);
+      const response = result.response;
+      const text = response.text();
 
-      // Execute request
-      const result = await openRouterProvider.executeRequest(request);
-
-      if (!result.success || !result.data) {
-        throw new Error(
-          `Investment plan generation failed: ${
-            result.error?.message || 'Unknown error'
-          }`
-        );
+      // Parse JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON found in response");
       }
 
-      // Parse and validate the response
-      // Clean the response to ensure it's valid JSON
-      const cleanedResponse = result.data.content.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      const planData = JSON.parse(cleanedResponse);
+      const planData = JSON.parse(jsonMatch[0]);
       const validatedPlan = this.validateAndFormatPlan(planData);
 
       return {
@@ -90,7 +71,6 @@ class InvestmentPlanService {
       };
     } catch (error) {
       console.error('Investment plan generation error:', error);
-      console.error('Raw response:', result?.data?.content);
       return {
         success: false,
         data: this.getFallbackPlan(questionnaireData, userProfile),
@@ -102,6 +82,54 @@ class InvestmentPlanService {
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
+  }
+
+  private createInvestmentPrompt(questionnaireData: InvestmentQuestionnaireData, userProfile?: UserProfile): string {
+    const age = userProfile?.age || 35;
+    const monthlyIncome = userProfile?.annual_income ? userProfile.annual_income / 12 : 50000;
+    const netWorth = userProfile?.total_net_worth || 500000;
+
+    return `You are an expert Indian investment advisor. Create a detailed personalized investment plan based on the following profile:
+
+User Profile:
+- Age: ${age} years
+- Monthly Income: ₹${monthlyIncome.toLocaleString()}
+- Net Worth: ₹${netWorth.toLocaleString()}
+- Experience Level: ${questionnaireData.experienceLevel}
+- Risk Comfort: ${questionnaireData.riskComfort}
+- Investment Horizon: ${questionnaireData.investmentHorizon}
+- Plan Type: ${questionnaireData.planType}
+- Financial Goals: ${questionnaireData.financialGoals?.join(', ') || 'General wealth creation'}
+
+Please provide a comprehensive investment plan in the following JSON format:
+{
+  "plan_name": "string",
+  "plan_type": "string",
+  "description": "string",
+  "risk_level": "low|medium|high",
+  "expected_return": "string",
+  "recommended_stocks": [
+    {
+      "symbol": "string",
+      "name": "string",
+      "allocation": number,
+      "sector": "string",
+      "reasoning": "string"
+    }
+  ],
+  "steps": [
+    {
+      "step_number": number,
+      "title": "string",
+      "description": "string",
+      "actions": ["string"],
+      "timeline": "string",
+      "expected_outcome": "string"
+    }
+  ],
+  "summary": "string",
+  "status": "ok"
+}`;
   }
 
   private validateAndFormatPlan(planData: any): InvestmentPlanOutput {

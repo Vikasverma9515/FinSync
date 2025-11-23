@@ -1,9 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { TrendingUp, CheckCircle2 } from 'lucide-react'
+import { TrendingUp, CheckCircle2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
@@ -18,6 +18,14 @@ export default function ProfileSetupPage() {
       router.push('/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [])
   const [formData, setFormData] = useState({
     age: '',
     riskScore: '5',
@@ -29,6 +37,24 @@ export default function ProfileSetupPage() {
     dependents: '0',
     investmentKnowledge: '1',
   })
+  const [portfolio, setPortfolio] = useState<Array<{
+    symbol: string
+    name: string
+    quantity: string
+    price: string
+    date: string
+  }>>([])
+  const [currentPortfolioItem, setCurrentPortfolioItem] = useState({
+    symbol: '',
+    name: '',
+    quantity: '',
+    price: '',
+    date: new Date().toISOString().split('T')[0],
+  })
+  const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string }>>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -38,6 +64,73 @@ export default function ProfileSetupPage() {
       ...prev,
       [name]: value
     }))
+  }
+
+  const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setCurrentPortfolioItem(prev => ({
+      ...prev,
+      [name]: value
+    }))
+
+    if (name === 'symbol' && value.length > 0) {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+
+      setIsSearching(true)
+      setShowSearchResults(true)
+
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/stocks/search?q=${encodeURIComponent(value)}`)
+          const data = await response.json()
+          if (Array.isArray(data)) {
+            setSearchResults(data)
+          } else {
+            setSearchResults([])
+          }
+        } catch (err) {
+          console.error('Error searching stocks:', err)
+          setSearchResults([])
+        } finally {
+          setIsSearching(false)
+        }
+      }, 300)
+    } else if (name === 'symbol' && value.length === 0) {
+      setShowSearchResults(false)
+      setSearchResults([])
+    }
+  }
+
+  const selectStock = (symbol: string, name: string) => {
+    setCurrentPortfolioItem(prev => ({
+      ...prev,
+      symbol,
+      name
+    }))
+    setShowSearchResults(false)
+    setSearchResults([])
+  }
+
+  const addPortfolioItem = () => {
+    if (!currentPortfolioItem.symbol || !currentPortfolioItem.name || !currentPortfolioItem.quantity || !currentPortfolioItem.price) {
+      setError('Please fill all portfolio fields')
+      return
+    }
+    setPortfolio(prev => [...prev, { ...currentPortfolioItem }])
+    setCurrentPortfolioItem({
+      symbol: '',
+      name: '',
+      quantity: '',
+      price: '',
+      date: new Date().toISOString().split('T')[0],
+    })
+    setError('')
+  }
+
+  const removePortfolioItem = (index: number) => {
+    setPortfolio(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,9 +170,33 @@ export default function ProfileSetupPage() {
 
       if (updateError) {
         setError(updateError.message)
-      } else {
-        router.push('/dashboard')
+        return
       }
+
+      if (portfolio.length > 0) {
+        const portfolioData = portfolio.map(item => ({
+          user_id: user.id,
+          symbol: item.symbol,
+          name: item.name,
+          quantity: parseInt(item.quantity),
+          average_price: parseFloat(item.price),
+          current_price: parseFloat(item.price),
+          purchase_date: new Date(item.date).toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+
+        const { error: portfolioError } = await supabase
+          .from('portfolios')
+          .insert(portfolioData)
+
+        if (portfolioError) {
+          setError(`Portfolio upload failed: ${portfolioError.message}`)
+          return
+        }
+      }
+
+      router.push('/dashboard')
     } catch (err) {
       setError('An unexpected error occurred')
     } finally {
@@ -328,6 +445,124 @@ export default function ProfileSetupPage() {
                     <option value="4">4 - Affluent</option>
                     <option value="5">5 - Very Wealthy</option>
                   </select>
+                </div>
+
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <label className="block text-sm font-semibold text-gray-900 mb-4">
+                    Your Portfolio (Optional)
+                  </label>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="relative">
+                        <label className="block text-xs text-gray-600 mb-2">Symbol</label>
+                        <input
+                          type="text"
+                          name="symbol"
+                          value={currentPortfolioItem.symbol}
+                          onChange={handlePortfolioChange}
+                          placeholder="e.g., RELIANCE"
+                          autoComplete="off"
+                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        />
+                        {showSearchResults && currentPortfolioItem.symbol && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                            {isSearching ? (
+                              <div className="p-3 text-center text-sm text-gray-500">Searching...</div>
+                            ) : searchResults.length > 0 ? (
+                              searchResults.map((result, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => selectStock(result.symbol, result.name)}
+                                  className="w-full px-3 py-2 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                                >
+                                  <p className="text-sm font-semibold text-gray-900">{result.symbol}</p>
+                                  <p className="text-xs text-gray-600">{result.name}</p>
+                                </button>
+                              ))
+                            ) : (
+                              <div className="p-3 text-center text-sm text-gray-500">No stocks found</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-2">Company Name</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={currentPortfolioItem.name}
+                          readOnly
+                          placeholder="Auto-filled from search"
+                          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition-all cursor-not-allowed"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-2">Quantity</label>
+                        <input
+                          type="number"
+                          name="quantity"
+                          value={currentPortfolioItem.quantity}
+                          onChange={handlePortfolioChange}
+                          placeholder="e.g., 50"
+                          min="1"
+                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-2">Price (₹)</label>
+                        <input
+                          type="number"
+                          name="price"
+                          value={currentPortfolioItem.price}
+                          onChange={handlePortfolioChange}
+                          placeholder="e.g., 2850.50"
+                          step="0.01"
+                          min="0"
+                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-600 mb-2">Purchase Date</label>
+                        <input
+                          type="date"
+                          name="date"
+                          value={currentPortfolioItem.date}
+                          onChange={handlePortfolioChange}
+                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addPortfolioItem}
+                      className="w-full px-4 py-2 bg-gray-100 text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Add Stock to Portfolio
+                    </button>
+                  </div>
+
+                  {portfolio.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-gray-600">Stocks Added ({portfolio.length})</p>
+                      {portfolio.map((item, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900">{item.symbol} - {item.name}</p>
+                            <p className="text-xs text-gray-600">{item.quantity} shares @ ₹{item.price}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePortfolioItem(index)}
+                            className="ml-2 px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

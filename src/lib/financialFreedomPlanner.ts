@@ -22,20 +22,104 @@ const RISK_ALLOCATIONS = {
   high: { stocks: 80, bonds: 10, cash: 5, other: 5 },
 }
 
-export function generateFinancialFreedomPlan(
+export async function generateFinancialFreedomPlan(
   inputs: FinancialFreedomInputs
-): FinancialFreedomPlan {
-  const wealthPathMap = calculateWealthPathMap(inputs)
-  const freedomScore = calculateFreedomScore(inputs, wealthPathMap)
-  const insights = generateInsights(inputs, wealthPathMap, freedomScore)
+): Promise<FinancialFreedomPlan> {
+  try {
+    // Call Gemini AI API to generate the plan
+    const response = await fetch('/api/ai/financial-freedom-plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputs),
+    })
 
-  return {
-    wealthPathMap,
-    freedomScore,
-    insights,
-    summary: generateSummary(inputs, wealthPathMap, freedomScore),
-    createdAt: new Date().toISOString(),
+    if (!response.ok) {
+      throw new Error('Failed to generate plan from Gemini AI')
+    }
+
+    const aiData = await response.json()
+
+    // Convert AI response to our FinancialFreedomPlan format
+    const wealthPathMap: WealthPathMap = {
+      yearlyTargets: aiData.yearlyTargets || [],
+      totalYears: inputs.timeHorizon,
+      finalWealth: aiData.yearlyTargets?.[aiData.yearlyTargets.length - 1]?.targetSavings || 0,
+      monthlySavingsNeeded: aiData.monthlySavingsNeeded || 0,
+    }
+
+    const freedomScore: FreedomScore = {
+      score: calculateFreedomScoreValue(inputs, wealthPathMap),
+      level: calculateFreedomLevel(inputs, wealthPathMap),
+      factors: {
+        savingsRate: Math.min(((inputs.monthlyIncome - inputs.monthlyExpenses) / inputs.monthlyIncome) * 100, 25),
+        investmentStrategy: 25,
+        timeHorizon: Math.min((inputs.timeHorizon / 10) * 25, 25),
+        riskManagement: wealthPathMap.finalWealth >= inputs.savingsGoal ? 25 : 15,
+      },
+      nextMilestone: getNextMilestoneAI(inputs, wealthPathMap),
+    }
+
+    const insights: PersonalizedInsight[] = aiData.insights || []
+
+    return {
+      wealthPathMap,
+      freedomScore,
+      insights,
+      summary: aiData.summary || generateSummary(inputs, wealthPathMap, freedomScore),
+      createdAt: new Date().toISOString(),
+    }
+  } catch (error) {
+    console.error('Error generating plan with Gemini AI, falling back to local generation:', error)
+    
+    // Fallback to local generation
+    const wealthPathMap = calculateWealthPathMap(inputs)
+    const freedomScore = calculateFreedomScore(inputs, wealthPathMap)
+    const insights = generateInsights(inputs, wealthPathMap, freedomScore)
+
+    return {
+      wealthPathMap,
+      freedomScore,
+      insights,
+      summary: generateSummary(inputs, wealthPathMap, freedomScore),
+      createdAt: new Date().toISOString(),
+    }
   }
+}
+
+function calculateFreedomScoreValue(inputs: FinancialFreedomInputs, wealthPathMap: WealthPathMap): number {
+  const savingsRate = ((inputs.monthlyIncome - inputs.monthlyExpenses) / inputs.monthlyIncome) * 100
+  const savingsRateScore = Math.min((savingsRate / 20) * 25, 25)
+  const investmentStrategyScore = inputs.riskPreference === 'medium' ? 25 : inputs.riskPreference === 'low' ? 20 : 15
+  const timeHorizonScore = Math.min((inputs.timeHorizon / 10) * 25, 25)
+  const riskManagementScore = wealthPathMap.finalWealth >= inputs.savingsGoal ? 25 : 15
+
+  return Math.round(savingsRateScore + investmentStrategyScore + timeHorizonScore + riskManagementScore)
+}
+
+function calculateFreedomLevel(inputs: FinancialFreedomInputs, wealthPathMap: WealthPathMap): FreedomScore['level'] {
+  const score = calculateFreedomScoreValue(inputs, wealthPathMap)
+  if (score >= 80) return 'expert'
+  if (score >= 60) return 'advanced'
+  if (score >= 40) return 'intermediate'
+  return 'beginner'
+}
+
+function getNextMilestoneAI(inputs: FinancialFreedomInputs, wealthPathMap: WealthPathMap): string {
+  const savingsRate = ((inputs.monthlyIncome - inputs.monthlyExpenses) / inputs.monthlyIncome) * 100
+  const level = calculateFreedomLevel(inputs, wealthPathMap)
+
+  if (level === 'beginner') {
+    return savingsRate < 15 ? 'Save 15% of your income monthly' : 'Plan for at least 5 years of investing'
+  }
+  if (level === 'intermediate') {
+    return inputs.timeHorizon < 7 ? 'Extend your investment horizon to 7+ years' : 'Optimize your risk allocation'
+  }
+  if (level === 'advanced') {
+    return 'Focus on consistent monthly investments and portfolio rebalancing'
+  }
+  return 'Maintain your excellent financial habits and consider advanced strategies'
 }
 
 function calculateWealthPathMap(inputs: FinancialFreedomInputs): WealthPathMap {

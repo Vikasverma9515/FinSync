@@ -210,7 +210,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
     setGeneratedPlan(null)
 
     try {
-      const response = await fetch('/api/ai/financial-plan', {
+      const response = await fetch('/api/ai/financial-freedom-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -230,21 +230,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
         throw new Error(`API error: ${response.status} - ${errorData.error}${errorData.details ? ': ' + errorData.details : ''}`)
       }
 
-      const apiResponse = await response.json()
-
-      // Try to parse the AI response
-      let planData
-      try {
-        planData = parseAIResponse(apiResponse.aiResponse)
-        console.log('Successfully parsed AI response')
-      } catch (parseError) {
-        console.warn('AI response parsing failed, using fallback:', parseError)
-        // Use fallback calculation
-        planData = generateFallbackPlan(formData)
-      }
-
-      // Add createdAt timestamp
-      planData.createdAt = apiResponse.createdAt
+      const planData = await response.json()
 
       setGeneratedPlan(planData)
 

@@ -4,7 +4,7 @@ import * as jose from 'jose'
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key-change-in-production')
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     let userId = null
@@ -31,70 +31,53 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    const { symbol, quantity, price } = await request.json()
+    const { symbol, quantity, average_price, purchase_date } = await request.json()
 
-    if (!symbol || !quantity || !price) {
+    if (!symbol || quantity === undefined || average_price === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    const { data: holding } = await supabase
+    const purchaseDate = purchase_date ? new Date(purchase_date).toISOString() : new Date().toISOString()
+
+    const { data: existingHolding, error: fetchError } = await supabase
       .from('portfolios')
       .select('*')
       .eq('user_id', userId)
       .eq('symbol', symbol)
       .single()
 
-    if (!holding) {
+    if (fetchError || !existingHolding) {
       return NextResponse.json(
-        { error: 'Stock not found in portfolio' },
+        { error: 'Holding not found' },
         { status: 404 }
       )
     }
 
-    if (holding.quantity < quantity) {
+    const { error: updateError } = await supabase
+      .from('portfolios')
+      .update({
+        quantity,
+        average_price,
+        purchase_date: purchaseDate,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('symbol', symbol)
+
+    if (updateError) {
+      console.error('Update error:', updateError)
       return NextResponse.json(
-        { error: 'Insufficient quantity to sell' },
-        { status: 400 }
+        { error: 'Failed to update holding' },
+        { status: 500 }
       )
     }
 
-    const newQuantity = holding.quantity - quantity
-    const totalValue = quantity * price
-
-    if (newQuantity === 0) {
-      await supabase
-        .from('portfolios')
-        .delete()
-        .eq('user_id', userId)
-        .eq('symbol', symbol)
-    } else {
-      await supabase
-        .from('portfolios')
-        .update({
-          quantity: newQuantity,
-          current_price: price,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-        .eq('symbol', symbol)
-    }
-
-    await supabase.from('transactions').insert({
-      user_id: userId,
-      type: 'sell',
-      symbol,
-      quantity,
-      price,
-      total_value: totalValue,
-      created_at: new Date().toISOString(),
-    })
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: 'Portfolio updated successfully' })
   } catch (error) {
-    console.error('Error selling stock:', error)
+    console.error('Error updating portfolio:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
