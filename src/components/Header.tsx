@@ -231,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               whileTap={{ scale: 0.98 }}
               aria-label="Go to homepage"
             >
-              <div className="text-2xl font-bold text-white">BankSync</div>
+              <div className="text-2xl font-bold text-white">FinSync</div>
             </motion.button>
 
             {/* Desktop Navigation */}
