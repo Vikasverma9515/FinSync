@@ -37,7 +37,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
-import { ChatbotWrapper } from '@/components/ChatbotWrapper'
 
 export const metadata: Metadata = {
   title: 'FinSync - AI-Powered Investment Tracking',
@@ -74,7 +73,6 @@ export default function RootLayout({
           <div className="min-h-screen bg-navy-900">
             {children}
           </div>
-          <ChatbotWrapper />
         </AuthProvider>
       </body>
     </html>
