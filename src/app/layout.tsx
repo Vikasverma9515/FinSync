@@ -43,6 +43,9 @@ export const metadata: Metadata = {
   description: 'Track your investments in real-time with AI-powered insights. Stocks, mutual funds, gold & silver - all in one place.',
   keywords: 'investment tracking, portfolio management, AI insights, stock market, mutual funds',
   authors: [{ name: 'FinSync Team' }],
+  icons: {
+    icon: '/logo.svg',
+  },
   openGraph: {
     title: 'FinSync - AI-Powered Investment Tracking',
     description: 'Track your investments in real-time with AI-powered insights',
