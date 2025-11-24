@@ -71,16 +71,16 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
       </div>
 
       {/* Projection Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* 5-Year Projection */}
-        <div className="group relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-[1.02]">
+        <div className="group relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 rounded-2xl p-5 md:p-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-lg font-bold text-white">5-Year Projection</p>
+            <p className="text-base md:text-lg font-bold text-white">5-Year Projection</p>
             <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/30">
               2029
             </span>
           </div>
-          <p className="text-4xl font-bold text-emerald-400 mb-4">₹{(projection5 / 100000).toFixed(2)}L</p>
+          <p className="text-3xl md:text-4xl font-bold text-emerald-400 mb-4">₹{(projection5 / 100000).toFixed(2)}L</p>
           <div className="space-y-2 pt-3 border-t border-emerald-500/20">
             <div className="flex justify-between items-center">
               <p className="text-sm text-slate-400">Base:</p>
@@ -94,14 +94,14 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
         </div>
 
         {/* 10-Year Projection */}
-        <div className="group relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 border border-teal-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300 hover:scale-[1.02]">
+        <div className="group relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 border border-teal-500/30 rounded-2xl p-5 md:p-6 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-lg font-bold text-white">10-Year Projection</p>
+            <p className="text-base md:text-lg font-bold text-white">10-Year Projection</p>
             <span className="text-xs font-bold bg-teal-500/20 text-teal-400 px-3 py-1.5 rounded-full border border-teal-500/30">
               2034
             </span>
           </div>
-          <p className="text-4xl font-bold text-teal-400 mb-4">₹{(projection10 / 100000).toFixed(2)}L</p>
+          <p className="text-3xl md:text-4xl font-bold text-teal-400 mb-4">₹{(projection10 / 100000).toFixed(2)}L</p>
           <div className="space-y-2 pt-3 border-t border-teal-500/20">
             <div className="flex justify-between items-center">
               <p className="text-sm text-slate-400">Base:</p>
@@ -115,14 +115,14 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
         </div>
 
         {/* 15-Year Projection */}
-        <div className="group relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]">
+        <div className="group relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-2xl p-5 md:p-6 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-lg font-bold text-white">15-Year Projection</p>
+            <p className="text-base md:text-lg font-bold text-white">15-Year Projection</p>
             <span className="text-xs font-bold bg-purple-500/20 text-purple-400 px-3 py-1.5 rounded-full border border-purple-500/30">
               2039
             </span>
           </div>
-          <p className="text-4xl font-bold text-purple-400 mb-4">₹{(projection15 / 100000).toFixed(2)}L</p>
+          <p className="text-3xl md:text-4xl font-bold text-purple-400 mb-4">₹{(projection15 / 100000).toFixed(2)}L</p>
           <div className="space-y-2 pt-3 border-t border-purple-500/20">
             <div className="flex justify-between items-center">
               <p className="text-sm text-slate-400">Base:</p>
@@ -136,14 +136,14 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
         </div>
 
         {/* 20-Year Projection */}
-        <div className="group relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 hover:scale-[1.02]">
+        <div className="group relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-5 md:p-6 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-lg font-bold text-white">20-Year Projection</p>
+            <p className="text-base md:text-lg font-bold text-white">20-Year Projection</p>
             <span className="text-xs font-bold bg-orange-500/20 text-orange-400 px-3 py-1.5 rounded-full border border-orange-500/30">
               2044
             </span>
           </div>
-          <p className="text-4xl font-bold text-orange-400 mb-4">₹{(projection20 / 100000).toFixed(2)}L</p>
+          <p className="text-3xl md:text-4xl font-bold text-orange-400 mb-4">₹{(projection20 / 100000).toFixed(2)}L</p>
           <div className="space-y-2 pt-3 border-t border-orange-500/20">
             <div className="flex justify-between items-center">
               <p className="text-sm text-slate-400">Base:</p>

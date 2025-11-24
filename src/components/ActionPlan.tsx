@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { CheckCircle2, Circle, ArrowRight, Calendar, Target as TargetIcon } from 'lucide-react'
+import { CheckCircle2, Circle, ArrowRight, Calendar, Target as TargetIcon, ChevronRight } from 'lucide-react'
 
 interface ActionStep {
     title: string
@@ -35,6 +35,7 @@ const ActionPlan: React.FC<ActionPlanProps> = ({
             title: 'Set Up Automatic Savings',
             description: `Create an automatic transfer of ₹${Math.round(monthlySavings).toLocaleString()} from your salary account to a separate savings/investment account on the 1st of every month.`,
             timeline: 'This week',
+            completed: true,
         },
         {
             title: 'Build Emergency Fund',
@@ -64,77 +65,101 @@ const ActionPlan: React.FC<ActionPlanProps> = ({
     ]
 
     return (
-        <Card className="bg-navy-800/50 border-slate-700/50">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                    <TargetIcon className="w-5 h-5 text-teal-400" />
-                    Your Action Plan - Simple Steps to Freedom
-                </CardTitle>
-                <p className="text-slate-400 text-sm mt-2">
-                    Follow these actionable steps to achieve your ₹{savingsGoal.toLocaleString()} goal in {timeHorizon} years
-                </p>
+        <Card className="bg-navy-800/50 border-slate-700/50 overflow-hidden">
+            <CardHeader className="border-b border-slate-700/50 bg-navy-900/30">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-white text-xl">
+                            <TargetIcon className="w-6 h-6 text-teal-400" />
+                            Your Action Plan
+                        </CardTitle>
+                        <p className="text-slate-400 text-sm mt-1">
+                            Simple steps to reach <span className="text-white font-medium">₹{savingsGoal.toLocaleString()}</span> in {timeHorizon} years
+                        </p>
+                    </div>
+                    <div className="hidden md:block">
+                        <div className="bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full text-xs font-medium text-teal-400">
+                            {steps.length} Steps to Freedom
+                        </div>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
+            <CardContent className="px-3 md:px-6 py-6">
+                <div className="space-y-0 relative w-full">
+                    {/* Continuous Timeline Line */}
+                    <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-teal-500 via-teal-500/30 to-slate-700/20" />
+
                     {steps.map((step, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="relative"
+                            className="relative pl-12 pb-8 last:pb-0 group"
                         >
-                            {/* Connector line */}
-                            {index < steps.length - 1 && (
-                                <div className="absolute left-4 top-12 bottom-0 w-0.5 bg-slate-700" />
-                            )}
+                            {/* Step Indicator */}
+                            <div className="absolute left-0 top-0">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center relative z-10 transition-all duration-300 ${step.completed
+                                    ? 'bg-teal-500 shadow-lg shadow-teal-500/20'
+                                    : 'bg-navy-900 border-2 border-slate-700 group-hover:border-teal-500/50 group-hover:shadow-lg group-hover:shadow-teal-500/10'
+                                    }`}>
+                                    {step.completed ? (
+                                        <CheckCircle2 className="w-5 h-5 text-navy-900" />
+                                    ) : (
+                                        <span className={`font-bold text-sm ${step.completed ? 'text-navy-900' : 'text-slate-400 group-hover:text-teal-400'}`}>
+                                            {index + 1}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
 
-                            <div className="flex gap-4">
-                                {/* Step number */}
-                                <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 rounded-full bg-teal-500/20 border-2 border-teal-500 flex items-center justify-center relative z-10">
-                                        {step.completed ? (
-                                            <CheckCircle2 className="w-5 h-5 text-teal-400" />
-                                        ) : (
-                                            <span className="text-teal-400 font-bold text-sm">{index + 1}</span>
-                                        )}
+                            {/* Content Card */}
+                            <div className="bg-navy-900/50 border border-slate-700/50 rounded-xl p-3 md:p-5 hover:border-teal-500/30 hover:bg-navy-800/80 transition-all duration-300 group-hover:translate-x-1">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+                                    <h3 className="text-white font-semibold text-lg group-hover:text-teal-400 transition-colors">
+                                        {step.title}
+                                    </h3>
+                                    <div className="flex items-center gap-1.5 text-xs font-medium text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-full self-start">
+                                        <Calendar className="w-3 h-3" />
+                                        {step.timeline}
                                     </div>
                                 </div>
-
-                                {/* Content */}
-                                <div className="flex-1 pb-6">
-                                    <div className="bg-navy-900/50 border border-slate-700/50 rounded-lg p-4 hover:border-teal-500/30 transition-all duration-200">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h3 className="text-white font-semibold">{step.title}</h3>
-                                            <div className="flex items-center gap-1 text-xs text-slate-400 bg-slate-700/30 px-2 py-1 rounded">
-                                                <Calendar className="w-3 h-3" />
-                                                {step.timeline}
-                                            </div>
-                                        </div>
-                                        <p className="text-slate-300 text-sm leading-relaxed">
-                                            {step.description}
-                                        </p>
-                                    </div>
-                                </div>
+                                <p className="text-slate-300 text-sm leading-relaxed">
+                                    {step.description}
+                                </p>
                             </div>
                         </motion.div>
                     ))}
                 </div>
 
                 {/* Summary */}
-                <div className="mt-6 bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/30 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                        <ArrowRight className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h4 className="text-white font-semibold mb-2">Quick Summary</h4>
-                            <ul className="space-y-1.5 text-sm text-slate-300">
-                                <li>• Save ₹{Math.round(monthlySavings).toLocaleString()}/month automatically</li>
-                                <li>• Build emergency fund of ₹{(monthlyExpenses * 6).toLocaleString()} first</li>
-                                <li>• Invest ₹{Math.round(monthlySavings * 0.7).toLocaleString()}/month in SIPs</li>
-                                <li>• Track expenses and review monthly</li>
-                                <li>• Increase income through side hustles</li>
-                                <li>• Review portfolio every 6 months</li>
-                            </ul>
+                <div className="mt-8 bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/20 rounded-xl p-6 relative overflow-hidden w-full">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+                    <div className="flex items-start gap-4 relative z-10 w-full">
+                        <div className="p-3 bg-teal-500/20 rounded-lg flex-shrink-0">
+                            <TargetIcon className="w-6 h-6 text-teal-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-semibold text-lg mb-3">Quick Summary</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
+                                <div className="flex items-center gap-2 text-sm text-slate-300">
+                                    <ChevronRight className="w-4 h-4 text-teal-500" />
+                                    <span>Save <span className="text-white font-medium">₹{Math.round(monthlySavings).toLocaleString()}</span>/month automatically</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-slate-300">
+                                    <ChevronRight className="w-4 h-4 text-teal-500" />
+                                    <span>Build emergency fund of <span className="text-white font-medium">₹{(monthlyExpenses * 6).toLocaleString()}</span></span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-slate-300">
+                                    <ChevronRight className="w-4 h-4 text-teal-500" />
+                                    <span>Invest <span className="text-white font-medium">₹{Math.round(monthlySavings * 0.7).toLocaleString()}</span>/month in SIPs</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-slate-300">
+                                    <ChevronRight className="w-4 h-4 text-teal-500" />
+                                    <span>Review portfolio every 6 months</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

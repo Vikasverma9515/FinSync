@@ -27,15 +27,15 @@ export default function FAQ() {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
     return (
-        <section id="faq" className="py-24 bg-navy-900 relative">
+        <section id="faq" className="py-16 md:py-24 bg-navy-900 relative">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                         Frequently Asked <span className="text-teal-400">Questions</span>
                     </h2>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                     {faqs.map((faq, index) => (
                         <motion.div
                             key={index}
@@ -47,13 +47,13 @@ export default function FAQ() {
                         >
                             <button
                                 onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                                className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+                                className="w-full flex items-center justify-between p-4 md:p-6 text-left focus:outline-none"
                             >
-                                <span className="text-lg font-medium text-white">{faq.question}</span>
+                                <span className="text-base md:text-lg font-medium text-white pr-4">{faq.question}</span>
                                 {activeIndex === index ? (
-                                    <Minus className="w-5 h-5 text-teal-400 flex-shrink-0" />
+                                    <Minus className="w-4 h-4 md:w-5 md:h-5 text-teal-400 flex-shrink-0" />
                                 ) : (
-                                    <Plus className="w-5 h-5 text-teal-400 flex-shrink-0" />
+                                    <Plus className="w-4 h-4 md:w-5 md:h-5 text-teal-400 flex-shrink-0" />
                                 )}
                             </button>
                             <AnimatePresence>
@@ -64,7 +64,7 @@ export default function FAQ() {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <div className="px-6 pb-6 text-slate-400 leading-relaxed">
+                                        <div className="px-4 pb-4 md:px-6 md:pb-6 text-slate-400 leading-relaxed text-sm md:text-base">
                                             {faq.answer}
                                         </div>
                                     </motion.div>

@@ -224,25 +224,25 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
         role="banner"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 md:h-20">
             {/* Logo */}
             <motion.button
               onClick={() => router.push('/')}
-              className="flex items-center gap-3 transition-all duration-200"
+              className="flex items-center gap-2 md:gap-3 transition-all duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               aria-label="Go to homepage"
             >
-              <div className=" p-2.5 rounded-full">
+              <div className="p-1.5 md:p-2.5 rounded-full">
                 <Image
                   src="/logo.svg"
                   alt="FinSync Logo"
-                  width={28}
-                  height={28}
-                  className="w-15 h-15"
+                  width={24}
+                  height={24}
+                  className="w-8 h-8 md:w-10 md:h-10"
                 />
               </div>
-              <div className="text-2xl font-bold text-white">FinSync</div>
+              <div className="text-xl md:text-2xl font-bold text-white">FinSync</div>
             </motion.button>
 
             {/* Desktop Navigation */}

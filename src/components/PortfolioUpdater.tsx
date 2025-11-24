@@ -254,7 +254,7 @@ export function PortfolioUpdater({ holdings, onUpdate, authToken }: PortfolioUpd
                 <p className="text-sm text-slate-400">{selectedStock.name}</p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1">Quantity</label>
                   <input
@@ -322,7 +322,7 @@ export function PortfolioUpdater({ holdings, onUpdate, authToken }: PortfolioUpd
             <div key={holding.id} className="p-4 bg-navy-900 border-slate-700">
               {editingId === holding.id ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-slate-400 mb-1">Quantity</label>
                       <input

@@ -37,6 +37,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
+import { AIWealthChatbot } from '@/components/AIWealthChatbot'
 
 export const metadata: Metadata = {
   title: 'FinSync - AI-Powered Investment Tracking',
@@ -68,11 +69,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body className="overflow-x-hidden">
         <AuthProvider>
           <div className="min-h-screen bg-navy-900">
             {children}
           </div>
+          <AIWealthChatbot />
         </AuthProvider>
       </body>
     </html>

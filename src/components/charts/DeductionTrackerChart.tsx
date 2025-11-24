@@ -21,11 +21,11 @@ const DeductionTrackerChart: React.FC<DeductionTrackerChartProps> = ({ deduction
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-navy-900/50 border border-slate-700/50 rounded-lg p-4"
+                        className="bg-navy-900/50 border border-slate-700/50 rounded-lg p-3 sm:p-4 md:p-5"
                     >
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-white font-semibold">Section {deduction.section}</h4>
-                            <span className="text-slate-400 text-sm">
+                            <h4 className="text-sm md:text-base text-white font-semibold">Section {deduction.section}</h4>
+                            <span className="text-slate-400 text-xs md:text-sm">
                                 Limit: ₹{deduction.limit.toLocaleString()}
                             </span>
                         </div>
@@ -73,7 +73,7 @@ const DeductionTrackerChart: React.FC<DeductionTrackerChartProps> = ({ deduction
 
                         {/* Recommendations */}
                         {deduction.recommendations.length > 0 && (
-                            <div className="bg-teal-500/10 border border-teal-500/30 rounded p-3">
+                            <div className="bg-teal-500/10 border border-teal-500/30 rounded p-2.5 md:p-3">
                                 <p className="text-teal-400 text-xs font-medium mb-2">💡 Recommendations:</p>
                                 <ul className="space-y-1">
                                     {deduction.recommendations.map((rec, i) => (

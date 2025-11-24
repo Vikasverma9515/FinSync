@@ -222,39 +222,39 @@ export default function ProfileSetupPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="bg-teal-400/10 p-2.5 rounded-lg border border-teal-400/30">
-              <TrendingUp className="w-6 h-6 text-teal-400" />
+          <div className="flex items-center justify-center gap-2 mb-4 md:mb-6">
+            <div className="bg-teal-400/10 p-2 md:p-2.5 rounded-lg border border-teal-400/30">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-teal-400" />
             </div>
-            <span className="text-2xl font-bold text-white">
+            <span className="text-xl md:text-2xl font-bold text-white">
               FinSync
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Complete Your Profile</h1>
-          <p className="text-slate-400">Help us personalize your investment journey</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Complete Your Profile</h1>
+          <p className="text-sm md:text-base text-slate-400">Help us personalize your investment journey</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-navy-800/50 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-slate-700/50"
+          className="bg-navy-800/50 backdrop-blur-xl rounded-2xl shadow-xl p-4 md:p-8 border border-slate-700/50"
         >
-          <div className="mb-10">
+          <div className="mb-8 md:mb-10">
             <div className="flex items-center justify-center">
               {[1, 2, 3].map((num, idx) => (
                 <div key={num} className="flex items-center">
                   {/* Step Circle and Label */}
                   <div className="flex flex-col items-center">
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center font-semibold text-lg transition-all shadow-lg ${num <= step
+                    <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center font-semibold text-sm md:text-lg transition-all shadow-lg ${num <= step
                       ? 'bg-teal-400 text-navy-900 shadow-teal-400/30'
                       : 'bg-navy-700/50 text-slate-500'
                       }`}>
-                      {num < step ? <CheckCircle2 className="w-7 h-7" /> : num}
+                      {num < step ? <CheckCircle2 className="w-5 h-5 md:w-7 md:h-7" /> : num}
                     </div>
-                    <p className={`text-sm mt-3 font-medium whitespace-nowrap ${num <= step ? 'text-white' : 'text-slate-500'
+                    <p className={`text-xs md:text-sm mt-2 md:mt-3 font-medium whitespace-nowrap ${num <= step ? 'text-white' : 'text-slate-500'
                       }`}>
                       {num === 1 ? 'Personal' : num === 2 ? 'Financial' : 'Investment'}
                     </p>
@@ -262,7 +262,7 @@ export default function ProfileSetupPage() {
 
                   {/* Connector Line */}
                   {idx < 2 && (
-                    <div className={`w-24 sm:w-32 h-1 mx-4 rounded-full transition-all ${num < step ? 'bg-teal-400' : 'bg-navy-700/50'
+                    <div className={`w-12 sm:w-32 h-0.5 md:h-1 mx-2 md:mx-4 rounded-full transition-all ${num < step ? 'bg-teal-400' : 'bg-navy-700/50'
                       }`} />
                   )}
                 </div>
@@ -276,11 +276,11 @@ export default function ProfileSetupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
             {step === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     What's your age?
                   </label>
                   <input
@@ -297,7 +297,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     How many dependents do you have?
                   </label>
                   <input
@@ -315,9 +315,9 @@ export default function ProfileSetupPage() {
             )}
 
             {step === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Annual Income (₹)
                   </label>
                   <input
@@ -334,7 +334,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Total Net Worth (₹)
                   </label>
                   <input
@@ -351,7 +351,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Risk Score (0-10)
                   </label>
                   <input
@@ -369,7 +369,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Investment Horizon (years)
                   </label>
                   <input
@@ -387,9 +387,9 @@ export default function ProfileSetupPage() {
             )}
 
             {step === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Investment Knowledge
                   </label>
                   <select
@@ -408,7 +408,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Financial Goal
                   </label>
                   <select
@@ -427,7 +427,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 md:mb-3">
                     Financial Condition
                   </label>
                   <select
@@ -451,7 +451,7 @@ export default function ProfileSetupPage() {
                   </label>
 
                   <div className="space-y-4 mb-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="block text-xs text-slate-400 mb-2">Symbol</label>
                         <input
@@ -521,7 +521,7 @@ export default function ProfileSetupPage() {
                           className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-1 md:col-span-2">
                         <label className="block text-xs text-slate-400 mb-2">Purchase Date</label>
                         <input
                           type="date"

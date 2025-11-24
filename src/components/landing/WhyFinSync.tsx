@@ -41,18 +41,18 @@ const features = [
 
 export default function WhyFinSync() {
     return (
-        <section id="features" className="py-24 bg-navy-900 relative">
+        <section id="features" className="py-16 md:py-24 bg-navy-900 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                         Why <span className="text-teal-400">FinSync</span>?
                     </h2>
-                    <p className="text-slate-400 max-w-2xl mx-auto">
+                    <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
                         Advanced tools for the modern investor, simplified for everyone.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
@@ -61,12 +61,12 @@ export default function WhyFinSync() {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -5 }}
-                            className="bg-navy-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-teal-400/30 transition-all group"
+                            className="bg-navy-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 md:p-6 hover:border-teal-400/30 transition-all group"
                         >
-                            <div className={`w-12 h-12 rounded-xl ${feature.bg} ${feature.border} border flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${feature.bg} ${feature.border} border flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform`}>
                                 <div className={feature.color}>{feature.icon}</div>
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                            <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3">{feature.title}</h3>
                             <p className="text-slate-400 text-sm leading-relaxed">
                                 {feature.description}
                             </p>

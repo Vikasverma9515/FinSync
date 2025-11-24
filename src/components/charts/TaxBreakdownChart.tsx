@@ -43,14 +43,14 @@ const TaxBreakdownChart: React.FC<TaxBreakdownChartProps> = ({ currentTax, optim
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full"
+            className="w-full sm:p-4"
         >
             <div className="mb-4 text-center">
-                <p className="text-slate-400 text-sm mb-1">Your Tax Savings</p>
-                <p className="text-4xl font-bold text-green-400">
+                <p className="text-slate-400 text-xs sm:text-sm mb-1">Your Tax Savings</p>
+                <p className="text-3xl sm:text-4xl font-bold text-green-400">
                     ₹{totalSavings.toLocaleString()}
                 </p>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-slate-400 text-xs sm:text-sm mt-1">
                     {((totalSavings / currentTax) * 100).toFixed(1)}% reduction
                 </p>
             </div>

@@ -46,59 +46,57 @@ const TaxSavingTipsCard: React.FC = () => {
     ]
 
     return (
-        <Card className="bg-navy-800/50 border-slate-700/50">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    Simple Tax-Saving Strategies
+        <Card className="bg-navy-800/50 border-slate-700/50 p-0">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-4">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-white">
+                    <Lightbulb className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0" />
+                    <span>Simple Tax-Saving Strategies</span>
                 </CardTitle>
-                <p className="text-slate-400 text-sm mt-2">
+                <p className="text-xs sm:text-sm text-slate-400 mt-2 sm:mt-2.5">
                     Easy ways to save tax - explained in simple language
                 </p>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-4 sm:p-5 pt-2 sm:pt-3 space-y-4 sm:space-y-5">
                 {tips.map((category, index) => {
-                    const Icon = category.icon
+                    const Icon = category.icon;
                     return (
                         <motion.div
                             key={category.category}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`bg-gradient-to-br ${category.bgColor} border ${category.borderColor} rounded-lg p-4`}
+                            className={`bg-gradient-to-br ${category.bgColor} border ${category.borderColor} rounded-lg p-4 sm:p-5`}
                         >
-                            <div className="flex items-center gap-2 mb-4">
-                                <Icon className={`w-5 h-5 ${category.color}`} />
-                                <h3 className="text-white font-semibold">{category.category}</h3>
+                            <div className="flex items-center gap-2.5 mb-4 sm:mb-5">
+                                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${category.color} flex-shrink-0`} />
+                                <h3 className="text-white font-semibold text-sm sm:text-base">{category.category}</h3>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-3 sm:space-y-3.5">
                                 {category.tips.map((item, i) => (
-                                    <div key={i} className="bg-navy-900/50 rounded-lg p-3 border border-slate-700/50">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h4 className="text-white font-medium text-sm">{item.tip}</h4>
-                                            <span className="text-green-400 font-semibold text-sm whitespace-nowrap ml-2">
+                                    <div key={i} className="bg-navy-900/50 rounded-lg p-3 sm:p-4 border border-slate-700/50">
+                                        <div className="flex flex-col gap-2 mb-2">
+                                            <h4 className="text-white font-medium text-xs sm:text-sm leading-snug pr-2">{item.tip}</h4>
+                                            <span className="text-green-400 font-semibold text-xs sm:text-sm">
                                                 {item.saving}
                                             </span>
                                         </div>
-                                        <p className="text-slate-400 text-xs">{item.why}</p>
+                                        <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{item.why}</p>
                                     </div>
                                 ))}
                             </div>
                         </motion.div>
-                    )
+                    );
                 })}
 
                 {/* Key Takeaway */}
-                <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/30 rounded-lg p-4">
-                    <h4 className="text-teal-400 font-semibold mb-2 flex items-center gap-2">
-                        <Lightbulb className="w-4 h-4" />
+                <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/30 rounded-lg p-4 sm:p-5 mt-2 sm:mt-3">
+                    <h4 className="text-teal-400 font-semibold mb-3 flex items-center gap-2.5">
+                        <Lightbulb className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                         Remember This
                     </h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">
-                        <strong className="text-white">Start early in the financial year!</strong> Don't wait until March to invest.
-                        Spread your investments throughout the year using SIPs. This way you save tax AND build wealth through
-                        disciplined investing. Even small amounts like ₹500/month in ELSS can save you ₹15,600 in taxes annually!
+                    <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                        <strong className="text-white">Start early in the financial year!</strong> Don't wait until March to invest. Spread your investments throughout the year using SIPs. This way you save tax AND build wealth through disciplined investing. Even small amounts like ₹500/month in ELSS can save you ₹15,600 in taxes annually!
                     </p>
                 </div>
             </CardContent>

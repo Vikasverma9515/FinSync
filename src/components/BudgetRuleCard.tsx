@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Home, ShoppingBag, PiggyBank, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Home, ShoppingBag, PiggyBank, TrendingUp, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react'
 
 interface BudgetRuleProps {
     monthlyIncome: number
@@ -26,36 +26,42 @@ const BudgetRuleCard: React.FC<BudgetRuleProps> = ({ monthlyIncome, monthlyExpen
 
     const budgetCategories = [
         {
-            name: 'Needs (50%)',
+            name: 'Needs',
+            target: '50%',
             icon: Home,
             color: 'from-blue-500/20 to-blue-500/5',
             borderColor: 'border-blue-500/30',
             textColor: 'text-blue-400',
+            barColor: 'bg-blue-500',
             recommended: needs,
             percentage: 50,
-            examples: ['Rent/EMI', 'Groceries', 'Utilities', 'Insurance', 'Transportation'],
+            examples: ['Rent/EMI', 'Groceries', 'Utilities'],
             current: currentNeedsPercent,
         },
         {
-            name: 'Wants (30%)',
+            name: 'Wants',
+            target: '30%',
             icon: ShoppingBag,
             color: 'from-purple-500/20 to-purple-500/5',
             borderColor: 'border-purple-500/30',
             textColor: 'text-purple-400',
+            barColor: 'bg-purple-500',
             recommended: wants,
             percentage: 30,
-            examples: ['Dining out', 'Entertainment', 'Shopping', 'Hobbies', 'Subscriptions'],
+            examples: ['Dining out', 'Entertainment', 'Shopping'],
             current: currentWantsPercent,
         },
         {
-            name: 'Savings (20%)',
+            name: 'Savings',
+            target: '20%',
             icon: PiggyBank,
             color: 'from-teal-500/20 to-teal-500/5',
             borderColor: 'border-teal-500/30',
             textColor: 'text-teal-400',
+            barColor: 'bg-teal-500',
             recommended: savings,
             percentage: 20,
-            examples: ['Emergency fund', 'Investments', 'Retirement', 'Goals', 'Debt repayment'],
+            examples: ['Emergency fund', 'Investments', 'Goals'],
             current: currentSavingsPercent,
         },
     ]
@@ -63,37 +69,40 @@ const BudgetRuleCard: React.FC<BudgetRuleProps> = ({ monthlyIncome, monthlyExpen
     const isFollowingRule = currentSavingsPercent >= 20
 
     return (
-        <Card className="bg-navy-800/50 border-slate-700/50">
-            <CardHeader>
-                <div className="flex items-center justify-between">
+        <Card className="bg-navy-800/50 border-slate-700/50 overflow-hidden relative">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+            <CardHeader className="relative z-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="flex items-center gap-2 text-white">
-                            <TrendingUp className="w-5 h-5 text-teal-400" />
+                        <CardTitle className="flex items-center gap-2 text-white text-xl">
+                            <TrendingUp className="w-6 h-6 text-teal-400" />
                             50/30/20 Budget Rule
                         </CardTitle>
-                        <CardDescription className="text-slate-400 mt-2">
-                            A simple framework to manage your money effectively
+                        <CardDescription className="text-slate-400 mt-1">
+                            The golden rule of budgeting for financial stability
                         </CardDescription>
                     </div>
                     {isFollowingRule ? (
-                        <div className="flex items-center gap-2 bg-teal-500/20 text-teal-400 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <div className="flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 text-teal-400 px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-teal-500/5">
                             <CheckCircle2 className="w-4 h-4" />
                             On Track
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-amber-500/5">
                             <AlertCircle className="w-4 h-4" />
-                            Needs Adjustment
+                            Adjustment Needed
                         </div>
                     )}
                 </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 relative z-10 px-4 md:px-6">
                 {/* Budget Categories */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                     {budgetCategories.map((category, index) => {
                         const Icon = category.icon
-                        const isOnTrack = category.current >= category.percentage - 5
+                        const isOnTrack = Math.abs(category.current - category.percentage) <= 5
 
                         return (
                             <motion.div
@@ -101,79 +110,85 @@ const BudgetRuleCard: React.FC<BudgetRuleProps> = ({ monthlyIncome, monthlyExpen
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`bg-gradient-to-br ${category.color} border ${category.borderColor} rounded-lg p-4`}
+                                className={`bg-gradient-to-br ${category.color} border ${category.borderColor} rounded-xl p-5 relative overflow-hidden group hover:shadow-lg transition-all duration-300`}
                             >
-                                <div className="flex items-center justify-between mb-3">
-                                    <Icon className={`w-6 h-6 ${category.textColor}`} />
-                                    <div className={`text-xs font-medium ${category.textColor} bg-white/10 px-2 py-1 rounded`}>
-                                        {category.percentage}%
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className={`p-2 rounded-lg bg-navy-900/50 ${category.textColor}`}>
+                                        <Icon className="w-5 h-5" />
+                                    </div>
+                                    <div className={`text-xs font-bold ${category.textColor} bg-navy-900/50 px-2 py-1 rounded-md border border-white/5`}>
+                                        Target: {category.target}
                                     </div>
                                 </div>
 
-                                <h3 className="text-white font-semibold mb-1">{category.name}</h3>
-                                <p className="text-2xl font-bold text-white mb-2">
-                                    ₹{category.recommended.toLocaleString()}
-                                </p>
+                                <div className="mb-4">
+                                    <h3 className="text-slate-300 text-sm font-medium mb-1">{category.name}</h3>
+                                    <p className="text-2xl font-bold text-white tracking-tight">
+                                        ₹{category.recommended.toLocaleString()}
+                                    </p>
+                                </div>
 
                                 {/* Progress bar */}
-                                <div className="mb-3">
-                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                        <span>Your current</span>
-                                        <span>{category.current.toFixed(0)}%</span>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Current: {category.current.toFixed(0)}%</span>
+                                        <span className={isOnTrack ? 'text-teal-400' : 'text-amber-400'}>
+                                            {isOnTrack ? 'Good' : category.current > category.percentage ? 'High' : 'Low'}
+                                        </span>
                                     </div>
-                                    <div className="w-full bg-navy-900 rounded-full h-2">
+                                    <div className="h-2 bg-navy-900/80 rounded-full overflow-hidden relative">
+                                        {/* Target Marker */}
+                                        <div
+                                            className="absolute top-0 bottom-0 w-0.5 bg-white/50 z-10"
+                                            style={{ left: `${category.percentage}%` }}
+                                        />
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(100, (category.current / category.percentage) * 100)}%` }}
+                                            animate={{ width: `${Math.min(100, (category.current / category.percentage) * category.percentage)}%` }} // Scale relative to 100% width but visually represent the value
                                             transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
-                                            className={`h-2 rounded-full ${isOnTrack ? 'bg-teal-500' : 'bg-amber-500'}`}
-                                        />
+                                            className={`h-full rounded-full ${category.barColor} relative`}
+                                        >
+                                            <div className="absolute inset-0 bg-white/20" />
+                                        </motion.div>
                                     </div>
                                 </div>
 
                                 {/* Examples */}
-                                <div className="space-y-1">
-                                    <p className="text-xs font-medium text-slate-400">Examples:</p>
-                                    {category.examples.slice(0, 3).map((example, i) => (
-                                        <p key={i} className="text-xs text-slate-500">• {example}</p>
-                                    ))}
+                                <div className="mt-4 pt-4 border-t border-white/5">
+                                    <div className="flex flex-wrap gap-2">
+                                        {category.examples.map((example, i) => (
+                                            <span key={i} className="text-[10px] text-slate-400 bg-navy-900/40 px-2 py-1 rounded-full">
+                                                {example}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         )
                     })}
                 </div>
 
-                {/* Recommendation */}
-                <div className="bg-navy-900/50 border border-slate-700/50 rounded-lg p-4">
-                    <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-teal-400" />
-                        Your Budget Recommendation
-                    </h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">
-                        Based on your monthly income of <span className="text-teal-400 font-semibold">₹{monthlyIncome.toLocaleString()}</span>,
-                        you should aim to spend:
-                    </p>
-                    <ul className="mt-3 space-y-2 text-sm">
-                        <li className="flex items-center gap-2 text-slate-300">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="font-medium">₹{needs.toLocaleString()}</span> on essential needs (rent, food, bills)
-                        </li>
-                        <li className="flex items-center gap-2 text-slate-300">
-                            <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                            <span className="font-medium">₹{wants.toLocaleString()}</span> on wants (entertainment, dining out)
-                        </li>
-                        <li className="flex items-center gap-2 text-slate-300">
-                            <div className="w-2 h-2 bg-teal-400 rounded-full" />
-                            <span className="font-medium">₹{savings.toLocaleString()}</span> towards savings and investments
-                        </li>
-                    </ul>
-
-                    {!isFollowingRule && (
-                        <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-                            <p className="text-amber-400 text-sm font-medium">
-                                💡 Tip: You're currently saving {currentSavingsPercent.toFixed(1)}%.
-                                Try to increase it to at least 20% by reducing discretionary spending.
+                {/* Recommendation Summary */}
+                <div className="bg-navy-900/50 border border-slate-700/50 rounded-xl p-5 flex flex-col md:flex-row items-start justify-between gap-4 w-full">
+                    <div className="flex items-start gap-4 flex-1">
+                        <div className="p-3 bg-teal-500/10 rounded-full hidden md:block">
+                            <TrendingUp className="w-6 h-6 text-teal-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-white font-semibold mb-1">Your Monthly Budget Plan</h4>
+                            <p className="text-slate-400 text-sm">
+                                Based on your income of <span className="text-white font-medium">₹{monthlyIncome.toLocaleString()}</span>,
+                                allocate <span className="text-blue-400">₹{needs.toLocaleString()}</span> for needs,
+                                <span className="text-purple-400"> ₹{wants.toLocaleString()}</span> for wants, and
+                                <span className="text-teal-400"> ₹{savings.toLocaleString()}</span> for savings.
                             </p>
+                        </div>
+                    </div>
+                    {!isFollowingRule && (
+                        <div className="flex-shrink-0">
+                            <button className="flex items-center gap-2 text-sm font-medium text-navy-900 bg-teal-500 hover:bg-teal-400 px-4 py-2 rounded-lg transition-colors">
+                                Adjust Budget <ArrowRight className="w-4 h-4" />
+                            </button>
                         </div>
                     )}
                 </div>

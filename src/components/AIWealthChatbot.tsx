@@ -151,7 +151,7 @@ export function AIWealthChatbot() {
                         initial={{ opacity: 0, y: 100, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 100, scale: 0.8 }}
-                        className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-navy-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden"
+                        className="fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full h-full md:w-96 md:h-[600px] bg-navy-800/95 backdrop-blur-xl md:rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-teal-400 to-teal-500 p-4 flex items-center justify-between">

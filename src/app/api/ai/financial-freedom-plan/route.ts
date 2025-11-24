@@ -8,7 +8,17 @@ const client = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.GROQ_API_KEY) {
+      console.error("GROQ_API_KEY is missing");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing API Key" },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
+    console.log("Financial Freedom Plan Request Body:", body);
+
     const {
       monthlyIncome,
       monthlyExpenses,
@@ -18,14 +28,29 @@ export async function POST(request: NextRequest) {
       currentSavings,
     } = body;
 
+    // Validate inputs
+    if (
+      typeof monthlyIncome !== 'number' ||
+      typeof monthlyExpenses !== 'number' ||
+      typeof savingsGoal !== 'number' ||
+      typeof timeHorizon !== 'number' ||
+      typeof currentSavings !== 'number'
+    ) {
+      console.error("Invalid input types:", body);
+      return NextResponse.json(
+        { error: "Invalid input: All financial values must be numbers" },
+        { status: 400 }
+      );
+    }
+
     const monthlyExpenses12 = monthlyExpenses * 12;
     const annualIncomeTarget = monthlyIncome * 12;
     const monthlySurplus = monthlyIncome - monthlyExpenses;
     const annualSurplus = monthlySurplus * 12;
     const riskAllocation = riskPreference === 'low' ? { stocks: 40, bonds: 40, cash: 20, other: 0 } :
-                          riskPreference === 'medium' ? { stocks: 60, bonds: 25, cash: 10, other: 5 } :
-                          { stocks: 75, bonds: 15, cash: 5, other: 5 };
-    
+      riskPreference === 'medium' ? { stocks: 60, bonds: 25, cash: 10, other: 5 } :
+        { stocks: 75, bonds: 15, cash: 5, other: 5 };
+
     const prompt = `You are an expert Indian financial freedom coach and wealth strategist with 15+ years of experience helping people achieve financial independence through disciplined investing and strategic planning.
 
 FINANCIAL PROFILE:
@@ -58,37 +83,47 @@ Use this realistic ${riskPreference} risk allocation:
 - Cash/FDs: ${riskAllocation.cash}%
 - Others: ${riskAllocation.other}%
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format. Do not include any text before or after the JSON.
 {
   "yearlyTargets": [
-    {"year": 1, "targetSavings": ${currentSavings + (annualSurplus * 1)}, "passiveIncome": ${(currentSavings + (annualSurplus * 1)) * 0.07}, "netWorth": ${currentSavings + (annualSurplus * 1) + ((currentSavings + (annualSurplus * 1)) * 0.07)}, "savingsRate": "${Math.round((annualSurplus / annualIncomeTarget) * 100)}%"},
-    {"year": 2, "targetSavings": ${currentSavings + (annualSurplus * 2)}, "passiveIncome": ${(currentSavings + (annualSurplus * 2)) * 0.08}, "netWorth": ${currentSavings + (annualSurplus * 2) + ((currentSavings + (annualSurplus * 2)) * 0.08)}, "savingsRate": "${Math.round((annualSurplus / annualIncomeTarget) * 100)}%"},
-    "...continue for each year up to ${timeHorizon}"
+    {
+      "year": 1,
+      "targetSavings": number,
+      "passiveIncome": number,
+      "netWorth": number,
+      "savingsRate": "percentage string"
+    }
+    // ... generate an entry for EVERY year from 1 to ${timeHorizon}
   ],
-  "monthlySavingsNeeded": ${Math.ceil(annualSurplus / 12)},
-  "daysToFinancialFreedom": ${Math.ceil((savingsGoal - currentSavings) / (annualSurplus / 365))},
-  "investmentAllocation": {"stocks": ${riskAllocation.stocks}, "bonds": ${riskAllocation.bonds}, "cash": ${riskAllocation.cash}, "other": ${riskAllocation.other}},
+  "monthlySavingsNeeded": number,
+  "daysToFinancialFreedom": number,
+  "investmentAllocation": {
+    "stocks": number,
+    "bonds": number,
+    "cash": number,
+    "other": number
+  },
   "investmentBreakdown": {
-    "monthlyStocksAmount": ${Math.ceil((monthlySurplus * riskAllocation.stocks) / 100)},
-    "monthlyBondsAmount": ${Math.ceil((monthlySurplus * riskAllocation.bonds) / 100)},
-    "monthlyCashAmount": ${Math.ceil((monthlySurplus * riskAllocation.cash) / 100)},
-    "monthlyOthersAmount": ${Math.ceil((monthlySurplus * riskAllocation.other) / 100)}
+    "monthlyStocksAmount": number,
+    "monthlyBondsAmount": number,
+    "monthlyCashAmount": number,
+    "monthlyOthersAmount": number
   },
   "insights": [
-    {"type": "achievement|warning|suggestion", "title": "Specific insight with numbers", "description": "Detailed explanation", "impact": "high|medium|low"}
+    {
+      "type": "achievement" | "warning" | "suggestion",
+      "title": "string",
+      "description": "string",
+      "impact": "high" | "medium" | "low"
+    }
   ],
-  "summary": "Compelling 4-5 sentence summary showing their exact path to ₹${savingsGoal.toLocaleString()} with specific milestones and monthly amounts",
-  "recommendations": [
-    "Invest ₹${Math.ceil((monthlySurplus * riskAllocation.stocks) / 100)} monthly in stocks through SIP",
-    "Place ₹${Math.ceil((monthlySurplus * riskAllocation.bonds) / 100)} in fixed income instruments",
-    "Keep ₹${Math.ceil((monthlySurplus * riskAllocation.cash) / 100)} as emergency fund monthly",
-    "At ${riskPreference} risk, expect 8-11% annual returns, reaching ₹${savingsGoal.toLocaleString()} in ${Math.ceil((savingsGoal - currentSavings) / annualSurplus)} years",
-    "More specific, actionable recommendations based on their exact situation"
-  ],
-  "taxOptimization": "Specific tax-saving strategies like ELSS, 80C, 80D based on their income",
-  "lifestyle": "Specific tips to increase savings rate without sacrificing quality of life"
+  "summary": "string",
+  "recommendations": ["string", "string", "string", "string", "string"],
+  "taxOptimization": "string",
+  "lifestyle": "string"
 }`;
 
+    console.log("Sending prompt to Groq...");
     const response = await client.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
@@ -97,23 +132,24 @@ Respond ONLY with valid JSON in this exact format:
           content: prompt,
         },
       ],
-      temperature: 0.7,
-      max_tokens: 2000,
+      temperature: 0.5, // Lower temperature for more deterministic JSON
+      max_tokens: 4000, // Increased tokens for long yearly arrays
+      response_format: { type: "json_object" },
     });
 
     const text = response.choices[0]?.message?.content || "";
-    
+
     console.log('Raw financial freedom plan response from Groq:', text.substring(0, 500));
 
     // Parse JSON from response - handle markdown code blocks
     let jsonText = text;
-    
+
     // Remove markdown code blocks if present
     const codeBlockMatch = text.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
     if (codeBlockMatch) {
       jsonText = codeBlockMatch[1];
     }
-    
+
     // Try to extract JSON object
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -124,10 +160,10 @@ Respond ONLY with valid JSON in this exact format:
     const planData = JSON.parse(jsonMatch[0]);
 
     return NextResponse.json(planData);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Financial Freedom Plan Error:", error);
     return NextResponse.json(
-      { error: "Failed to generate financial freedom plan" },
+      { error: error.message || "Failed to generate financial freedom plan", details: error.toString() },
       { status: 500 }
     );
   }

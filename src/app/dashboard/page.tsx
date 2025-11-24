@@ -23,7 +23,6 @@ import type { UserProfile, Portfolio } from '@/types'
 import type { StockQuote, PredictResponse } from '@/lib/stocks'
 import Header from '@/components/Header'
 import { DashboardLoader } from '@/components/DashboardLoader'
-import { AIWealthChatbot } from '@/components/AIWealthChatbot'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -445,22 +444,22 @@ export default function Dashboard() {
     <div className="min-h-screen bg-navy-900">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="space-y-6"
         >
-          <motion.div variants={itemVariants} className="mb-8">
+          <motion.div variants={itemVariants} className="mb-6 md:mb-8">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <p className="text-slate-400 text-sm mb-1">Welcome back,</p>
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+                <p className="text-slate-400 text-xs md:text-sm mb-1">Welcome back,</p>
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-2 md:gap-3">
                   {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Investor'}
                   <span className="animate-pulse">👋</span>
                 </h2>
-                <p className="text-slate-400 text-lg">
+                <p className="text-slate-400 text-sm md:text-lg">
                   Risk Score: <span className="text-teal-400 font-semibold">{profile?.risk_score}</span> • <span className="text-teal-400 font-semibold">{profile?.age}</span> years old
                 </p>
               </div>
@@ -468,14 +467,14 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium text-sm">Portfolio Value</h3>
                 <div className="bg-teal-400/10 p-2 rounded-lg">
                   <DollarSign className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ₹{(totalPortfolioValue / 100000).toFixed(2)}L
               </div>
               <div className={`text-sm font-medium flex items-center ${totalGain >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
@@ -484,14 +483,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium text-sm">Total Invested</h3>
                 <div className="bg-teal-400/10 p-2 rounded-lg">
                   <Activity className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ₹{(totalCost / 100000).toFixed(2)}L
               </div>
               <div className="text-sm text-slate-400">
@@ -499,14 +498,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium text-sm">Holdings</h3>
                 <div className="bg-purple-400/10 p-2 rounded-lg">
                   <Target className="w-5 h-5 text-purple-400" />
                 </div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-3">
                 {holdings.length}
               </div>
               <div className="text-sm text-slate-400">
@@ -517,12 +516,12 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
-          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
             <h3 className="text-white font-semibold mb-6 text-lg flex items-center">
               <LineChart className="w-5 h-5 mr-2 text-teal-400" />
               Portfolio Performance
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -541,14 +540,14 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.3 }}>
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <h3 className="text-2xl font-bold text-white flex items-center">
-              <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
+          <div className="flex items-center justify-between mb-4 md:mb-6 flex-wrap gap-4">
+            <h3 className="text-xl md:text-2xl font-bold text-white flex items-center">
+              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 mr-2 text-teal-400" />
               Market Trends
             </h3>
             <Button
               onClick={() => setShowSearch(true)}
-              className="bg-teal-500 hover:bg-teal-600 text-navy-900 border-0 rounded-xl font-medium"
+              className="bg-teal-500 hover:bg-teal-600 text-navy-900 border-0 rounded-xl font-medium text-sm md:text-base px-3 md:px-4"
             >
               <Search className="w-4 h-4 mr-2" />
               Add Stock
@@ -585,11 +584,11 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-          <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
             <RiFundsBoxFill className="text-teal-400" />
             Manage Portfolio
           </h3>
-          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
             <PortfolioUpdater
               holdings={holdings}
               onUpdate={reloadPortfolioData}
@@ -599,10 +598,10 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.5 }}>
-          <h3 className="text-2xl font-bold text-white mb-6">Holdings & Performance</h3>
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Holdings & Performance</h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h4 className="text-lg font-semibold text-white flex items-center gap-2">
                   <FaWallet className="text-teal-400" />
@@ -646,7 +645,7 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2 text-teal-400" />
                 Live Prices
@@ -669,7 +668,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="lg:col-span-2 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <div className="lg:col-span-2 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
                 <BiStats className="w-6 h-6 text-teal-400" />
                 Profit/Loss Analysis
@@ -731,7 +730,7 @@ export default function Dashboard() {
                           <p className="text-xs text-slate-500 mt-1">Realized + Unrealized</p>
                         </div>
                         <div className="text-right">
-                          <p className={`text-3xl font-bold ${profitLoss.totalProfit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
+                          <p className={`text-2xl md:text-3xl font-bold ${profitLoss.totalProfit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                             {profitLoss.totalProfit >= 0 ? '+' : ''}₹{Math.abs(profitLoss.totalProfit).toFixed(0)}
                           </p>
                           <p className={`text-sm font-semibold ${profitLoss.percentage >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
@@ -761,25 +760,25 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.6 }}>
-          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
             <Target className="w-6 h-6 mr-2 text-purple-400" />
             Investment Planning
           </h3>
-          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+          <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
             <ProjectionCalculator holdings={holdings} />
           </div>
         </motion.div>
 
         {predictData && (
           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.7 }}>
-            <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
               <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
               AI-Powered Strategy
             </h3>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Asset Allocation Card */}
-              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
                 <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                   <FaChartPie className="text-teal-400" />
                   Asset Allocation
@@ -848,7 +847,7 @@ export default function Dashboard() {
               </div>
 
               {/* Recommendations Card */}
-              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
                 <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                   <FaRobot className="text-teal-400" />
                   Recommendations
@@ -882,35 +881,35 @@ export default function Dashboard() {
             </div>
 
             {/* Investor Profile Card */}
-            <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <h4 className="text-xl font-bold text-white mb-6 flex items-center">
                 <FaPiggyBank className="w-6 h-6 mr-2 text-teal-400" />
                 Investor Profile
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div className="p-5 bg-gradient-to-br from-teal-500/10 to-teal-600/5 rounded-xl border border-teal-400/30 hover:shadow-lg hover:shadow-teal-500/10 transition-all">
+                <div className="p-4 md:p-5 bg-gradient-to-br from-teal-500/10 to-teal-600/5 rounded-xl border border-teal-400/30 hover:shadow-lg hover:shadow-teal-500/10 transition-all">
                   <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Age</p>
-                  <p className="text-white font-bold text-3xl">{predictData.user_profile.Age}</p>
+                  <p className="text-white font-bold text-2xl md:text-3xl">{predictData.user_profile.Age}</p>
                   <p className="text-teal-400 text-xs mt-1">years</p>
                 </div>
-                <div className="p-5 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl border border-emerald-400/30 hover:shadow-lg hover:shadow-emerald-500/10 transition-all">
+                <div className="p-4 md:p-5 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl border border-emerald-400/30 hover:shadow-lg hover:shadow-emerald-500/10 transition-all">
                   <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Risk Score</p>
-                  <p className="text-white font-bold text-3xl">{predictData.user_profile.RiskScore}</p>
+                  <p className="text-white font-bold text-2xl md:text-3xl">{predictData.user_profile.RiskScore}</p>
                   <p className="text-emerald-400 text-xs mt-1">out of 10</p>
                 </div>
-                <div className="p-5 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl border border-purple-400/30 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
+                <div className="p-4 md:p-5 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl border border-purple-400/30 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
                   <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Horizon</p>
-                  <p className="text-white font-bold text-3xl">{predictData.user_profile.InvestmentHorizon}</p>
+                  <p className="text-white font-bold text-2xl md:text-3xl">{predictData.user_profile.InvestmentHorizon}</p>
                   <p className="text-purple-400 text-xs mt-1">years</p>
                 </div>
-                <div className="p-5 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl border border-orange-400/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
+                <div className="p-4 md:p-5 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl border border-orange-400/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
                   <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Dependents</p>
-                  <p className="text-white font-bold text-3xl">{predictData.user_profile.Dependents}</p>
+                  <p className="text-white font-bold text-2xl md:text-3xl">{predictData.user_profile.Dependents}</p>
                   <p className="text-orange-400 text-xs mt-1">people</p>
                 </div>
-                <div className="p-5 bg-gradient-to-br from-pink-500/10 to-pink-600/5 rounded-xl border border-pink-400/30 hover:shadow-lg hover:shadow-pink-500/10 transition-all">
+                <div className="p-4 md:p-5 bg-gradient-to-br from-pink-500/10 to-pink-600/5 rounded-xl border border-pink-400/30 hover:shadow-lg hover:shadow-pink-500/10 transition-all">
                   <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Income</p>
-                  <p className="text-white font-bold text-2xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
+                  <p className="text-white font-bold text-xl md:text-2xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
                   <p className="text-pink-400 text-xs mt-1">per year</p>
                 </div>
               </div>
@@ -927,9 +926,6 @@ export default function Dashboard() {
           onStockAdded={reloadPortfolioData}
         />
       )}
-
-      {/* AI Wealth Manager Chatbot */}
-      <AIWealthChatbot />
 
     </div>
   )

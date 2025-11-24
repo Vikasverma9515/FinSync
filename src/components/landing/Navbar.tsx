@@ -31,19 +31,19 @@ export default function Navbar() {
             className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
+                <div className="flex items-center justify-between h-16 md:h-20">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className=" p-2.5 rounded-full">
+                    <Link href="/" className="flex items-center gap-2 md:gap-3 group">
+                        <div className="p-1.5 md:p-2.5 rounded-full">
                             <Image
                                 src="/logo.svg"
                                 alt="FinSync Logo"
-                                width={28}
-                                height={28}
-                                className="w-15 h-15"
+                                width={24}
+                                height={24}
+                                className="w-8 h-8 md:w-10 md:h-10"
                             />
                         </div>
-                        <span className="text-2xl font-bold text-white tracking-tight">
+                        <span className="text-xl md:text-2xl font-bold text-white tracking-tight">
                             FinSync
                         </span>
                     </Link>
@@ -81,7 +81,7 @@ export default function Navbar() {
                     <div className="md:hidden">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="text-slate-300 hover:text-white transition-colors"
+                            className="text-slate-300 hover:text-white transition-colors p-2"
                         >
                             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
@@ -95,30 +95,30 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="md:hidden bg-navy-900 border-b border-navy-700"
+                    className="md:hidden bg-navy-900/95 backdrop-blur-xl border-b border-navy-700 absolute w-full left-0"
                 >
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         {['Features', 'Reviews', 'AI Planner', 'Pricing', 'FAQ'].map((item) => (
                             <Link
                                 key={item}
                                 href={`#${item.toLowerCase().replace(' ', '-')}`}
-                                className="block px-3 py-2 text-base font-medium text-slate-300 hover:text-white hover:bg-navy-800 rounded-md"
+                                className="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-navy-800 rounded-md transition-colors"
                                 onClick={() => setIsOpen(false)}
                             >
                                 {item}
                             </Link>
                         ))}
-                        <div className="pt-4 space-y-3">
+                        <div className="pt-4 space-y-3 border-t border-slate-800 mt-4">
                             <Link
                                 href="/login"
-                                className="block w-full text-center px-3 py-2 text-base font-medium text-slate-300 hover:text-white hover:bg-navy-800 rounded-md"
+                                className="block w-full text-center px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-navy-800 rounded-md transition-colors"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Sign In
                             </Link>
                             <Link
                                 href="/signup"
-                                className="block w-full text-center px-3 py-2 text-base font-medium text-navy-900 bg-teal-400 hover:bg-teal-300 rounded-md"
+                                className="block w-full text-center px-3 py-3 text-base font-medium text-navy-900 bg-teal-400 hover:bg-teal-300 rounded-md transition-colors shadow-lg shadow-teal-400/20"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started

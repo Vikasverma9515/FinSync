@@ -45,24 +45,19 @@ interface FinancialFreedomPlannerProps {
 
 const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBack }) => {
   const [currentStep, setCurrentStep] = useState(1)
-  const [resultsView, setResultsView] = useState<'results' | 'coach'>('results')
+  const [resultsView, setResultsView] = useState<'results'>('results')
   const [formData, setFormData] = useState({
     monthlyIncome: '',
     monthlyExpenses: '',
     savingsGoal: '',
     timeHorizon: '',
-    riskPreference: '',
+    riskPreference: 'medium',
     currentSavings: '',
   })
   const [generatedPlan, setGeneratedPlan] = useState<any>(null)
-  const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Coach state
-  const [coachMessages, setCoachMessages] = useState<FinancialCoachMessage[]>([])
-  const [coachInput, setCoachInput] = useState('')
-  const [isCoachTyping, setIsCoachTyping] = useState(false)
+  const [showResults, setShowResults] = useState(false)
 
   const totalSteps = 6
 
@@ -240,10 +235,6 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
       const planData = await response.json()
 
       setGeneratedPlan(planData)
-
-      // Initialize coach with welcome message
-      const welcomeMessage = generateCoachWelcomeMessage(planData)
-      setCoachMessages([welcomeMessage])
     } catch (error) {
       console.error('Error generating plan:', error)
       setError(error instanceof Error ? error.message : 'An unexpected error occurred')
@@ -251,40 +242,6 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
       setShowResults(false)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleCoachSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!coachInput.trim() || !generatedPlan) return
-
-    const userMessage: FinancialCoachMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: coachInput,
-      timestamp: new Date().toISOString(),
-    }
-
-    setCoachMessages(prev => [...prev, userMessage])
-    setCoachInput('')
-    setIsCoachTyping(true)
-
-    try {
-      const response = await getFinancialCoachResponse(coachInput, generatedPlan, coachMessages)
-
-      const assistantMessage: FinancialCoachMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response.response,
-        timestamp: new Date().toISOString(),
-        suggestions: response.suggestions,
-      }
-
-      setCoachMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
-      console.error('Coach error:', error)
-    } finally {
-      setIsCoachTyping(false)
     }
   }
 
@@ -370,8 +327,8 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
 
   if (showResults && generatedPlan) {
     return (
-      <div className="min-h-screen bg-navy-900 p-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-navy-900 px-2 py-4 md:px-6 md:py-6">
+        <div className="w-full">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <Button variant="ghost" size="icon" onClick={onBack}>
@@ -390,12 +347,11 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
           <div className="flex gap-2 mb-6">
             {[
               { key: 'results', label: 'Your Plan', icon: TrendingUp },
-              { key: 'coach', label: 'AI Coach', icon: MessageCircle },
             ].map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
                 variant={resultsView === key ? 'default' : 'outline'}
-                onClick={() => setResultsView(key as 'results' | 'coach')}
+                onClick={() => setResultsView(key as 'results')}
                 className={`flex items-center gap-2 ${resultsView === key ? 'bg-teal-500 text-navy-900' : 'text-slate-400 border-slate-700 hover:text-white hover:bg-navy-800'}`}
               >
                 <Icon className="w-4 h-4" />
@@ -419,8 +375,8 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <Card className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border-teal-500/30">
-                      <CardContent className="pt-6">
+                    <Card className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border-teal-500/30 p-0">
+                      <CardContent className="p-4 md:p-6">
                         <div className="flex items-center justify-between mb-2">
                           <Target className="w-8 h-8 text-teal-400" />
                           <div className="text-xs font-medium text-teal-400 bg-teal-500/20 px-2 py-1 rounded">
@@ -446,8 +402,8 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/30">
-                      <CardContent className="pt-6">
+                    <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/30 p-0">
+                      <CardContent className="p-4 md:p-6">
                         <div className="flex items-center justify-between mb-2">
                           <DollarSign className="w-8 h-8 text-blue-400" />
                           <div className="text-xs font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">
@@ -473,8 +429,8 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/30">
-                      <CardContent className="pt-6">
+                    <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/30 p-0">
+                      <CardContent className="p-4 md:p-6">
                         <div className="flex items-center justify-between mb-2">
                           <TrendingUp className="w-8 h-8 text-amber-400" />
                           <div className="text-xs font-medium text-amber-400 bg-amber-500/20 px-2 py-1 rounded">
@@ -497,7 +453,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                 </div>
 
                 {/* Summary */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
+                <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                   <CardHeader>
                     <CardTitle className="text-white">Your Financial Freedom Plan</CardTitle>
                     <CardDescription className="text-slate-400">{generatedPlan.summary}</CardDescription>
@@ -505,7 +461,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                 </Card>
 
                 {/* Freedom Score */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
+                <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
                       <Trophy className="w-5 h-5 text-teal-400" />
@@ -530,7 +486,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                 </Card>
 
                 {/* Wealth Growth Visualization */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
+                <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
                       <TrendingUp className="w-5 h-5 text-teal-400" />
@@ -550,7 +506,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
 
                 {/* Asset Allocation */}
                 {(generatedPlan.wealthPathMap?.yearlyTargets?.[0]?.investmentAllocation || generatedPlan.investmentAllocation) && (
-                  <Card className="bg-navy-800/50 border-slate-700/50">
+                  <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-white">
                         <PieChart className="w-5 h-5 text-teal-400" />
@@ -570,7 +526,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
 
                 {/* Monthly Breakdown - First Year */}
                 {generatedPlan.wealthPathMap?.monthlyBreakdown && (
-                  <Card className="bg-navy-800/50 border-slate-700/50">
+                  <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-white">
                         <Clock className="w-5 h-5 text-teal-400" />
@@ -587,7 +543,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                 )}
 
                 {/* Insights */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
+                <Card className="bg-navy-800/50 border-slate-700/50 p-0">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
                       <Lightbulb className="w-5 h-5 text-teal-400" />
@@ -636,81 +592,6 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
                 />
               </motion.div>
             )}
-
-            {resultsView === 'coach' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="max-w-4xl mx-auto"
-              >
-                {/* Coach Interface */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
-                      <MessageCircle className="w-5 h-5 text-teal-400" />
-                      AI Financial Coach
-                    </CardTitle>
-                    <CardDescription className="text-slate-400">Get personalized advice and stay motivated on your journey</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 max-h-96 overflow-y-auto mb-4 custom-scrollbar">
-                      {coachMessages.map((message) => (
-                        <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.role === 'user'
-                            ? 'bg-teal-500 text-navy-900'
-                            : 'bg-navy-900 border border-slate-700 text-slate-200'
-                            }`}>
-                            <p className="text-sm">{message.content}</p>
-                            {message.suggestions && message.suggestions.length > 0 && (
-                              <div className="mt-2 space-y-1">
-                                {message.suggestions.map((suggestion, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={() => setCoachInput(suggestion)}
-                                    className="block text-xs underline hover:no-underline opacity-80 hover:opacity-100"
-                                  >
-                                    {suggestion}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      {isCoachTyping && (
-                        <div className="flex justify-start">
-                          <div className="bg-navy-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <div className="flex gap-1">
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                              </div>
-                              <span className="text-sm text-slate-400">Maya is typing...</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={coachInput}
-                        onChange={(e) => setCoachInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleCoachSubmit(e as any)}
-                        placeholder="Ask Maya anything about your financial plan..."
-                        className="flex-1 p-3 bg-navy-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                      <Button onClick={handleCoachSubmit} disabled={!coachInput.trim() || isCoachTyping} className="bg-teal-500 hover:bg-teal-600 text-navy-900">
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
           </AnimatePresence>
         </div>
       </div>
@@ -720,7 +601,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
   // Questionnaire Steps
   return (
     <div className="min-h-screen bg-navy-900 p-4">
-      <div className="max-w-4xl mx-auto py-20">
+      <div className="max-w-4xl mx-auto py-10 md:py-20">
         {/* Header */}
         <motion.div
           className="text-center mb-8"
@@ -770,7 +651,7 @@ const FinancialFreedomPlanner: React.FC<FinancialFreedomPlannerProps> = ({ onBac
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="bg-navy-800/50 rounded-2xl shadow-sm border border-slate-700/50 p-6 lg:p-8"
+            className="bg-navy-800/50 rounded-2xl shadow-sm border border-slate-700/50 p-4 md:p-6 lg:p-8"
           >
             <div className="mb-6">
               <h2 className="text-xl lg:text-2xl font-bold text-white mb-2">

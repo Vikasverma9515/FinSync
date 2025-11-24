@@ -135,7 +135,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-navy-900 border-slate-700 shadow-2xl">
+      <div className="bg-navy-900 border border-slate-700 shadow-2xl w-full max-w-md rounded-xl overflow-hidden">
         <div className="p-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -144,12 +144,12 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search stocks..."
-              className="w-full pl-10 pr-4 py-3 bg-navy-800 border-slate-700 text-white placeholder-slate-400 focus:border-teal-500 focus:ring-teal-500"
+              className="w-full pl-10 pr-4 py-3 bg-navy-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
               autoFocus
             />
           </div>
 
-          <div className="space-y-2 max-h-80 overflow-y-auto">
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
             {isLoading && !selectedStock && (
               <div className="text-center py-4 text-slate-400">Searching...</div>
             )}
@@ -159,7 +159,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
             )}
 
             {selectedStock && (
-              <div className="p-4 bg-teal-400/10 border-teal-400/20">
+              <div className="p-4 bg-teal-400/10 border border-teal-400/20 rounded-lg">
                 <p className="font-semibold text-white mb-1">{selectedStock.symbol}</p>
                 <p className="text-sm text-slate-400 mb-3">{selectedStock.name}</p>
                 <div className="flex items-baseline gap-2 mb-4">
@@ -188,7 +188,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                         min="1"
                         value={buyData.quantity}
                         onChange={(e) => setBuyData({ ...buyData, quantity: parseInt(e.target.value) || 1 })}
-                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                        className="w-full mt-1 px-3 py-2 bg-navy-800 border border-slate-700 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -199,7 +199,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                         step="0.01"
                         value={buyData.price}
                         onChange={(e) => setBuyData({ ...buyData, price: parseFloat(e.target.value) || 0 })}
-                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                        className="w-full mt-1 px-3 py-2 bg-navy-800 border border-slate-700 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -208,7 +208,7 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                         type="date"
                         value={buyData.date}
                         onChange={(e) => setBuyData({ ...buyData, date: e.target.value })}
-                        className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                        className="w-full mt-1 px-3 py-2 bg-navy-800 border border-slate-700 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                     <div className="pt-2 space-y-2">

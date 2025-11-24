@@ -66,6 +66,7 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
   const [layoutOffset, setLayoutOffset] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'portfolio' | 'steps' | 'learn'>('overview');
 
   const totalSteps = 7;
 
@@ -299,375 +300,268 @@ const InvestmentPlannerSuggestor: React.FC<InvestmentPlannerSuggestorProps> = ({
 
   if (showResults && generatedPlan) {
     return (
-      <div className="min-h-screen p-4">
+      <div className="min-h-screen bg-navy-900 flex flex-col">
         {/* Header Navigation */}
         <motion.div
-          className="sticky z-0 border-b lg:static bg-navy-900"
-          style={{ borderColor: "#334155", top: layoutOffset }}
+          className="sticky top-0 z-50 bg-navy-900/95 backdrop-blur-xl border-b border-slate-800"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="w-full px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-            <div className="flex items-center justify-between gap-2 sm:gap-3">
-              {/* Back Button */}
-              <motion.button
-                onClick={() => {
-                  setShowResults(false);
-                  setError(null);
-                }}
-                className="p-1.5 sm:p-2 -ml-1 sm:ml-0 rounded-lg hover:bg-navy-800 transition-colors flex-shrink-0"
-                whileHover={{ x: -5 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ArrowLeft
-                  className="w-4 sm:w-5 h-4 sm:h-5"
-                  style={{ color: "#E2E8F0" }}
-                />
-              </motion.button>
-
-              {/* Title Section */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div
-                  className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: "#1F2A37" }}
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <button
+                  onClick={() => setShowResults(false)}
+                  className="p-2 -ml-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
                 >
-                  <PieChart className="w-4 sm:w-5 lg:w-8 h-4 sm:h-5 lg:h-8 text-teal-400" />
-                </div>
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
                 <div className="min-w-0">
-                  <h1
-                    className="text-base sm:text-lg lg:text-2xl font-normal leading-tight"
-                    style={{
-                      color: "#E2E8F0",
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
+                  <h1 className="text-lg font-semibold text-white truncate">
                     {generatedPlan.plan_name}
                   </h1>
-                  <div className="text-xs sm:text-sm hidden sm:block" style={{ color: "#94A3B8" }}>
-                    Personalized Investment Plan
-                  </div>
+                  <p className="text-xs text-slate-400 truncate">
+                    {generatedPlan.risk_level} • {generatedPlan.expected_return} Return
+                  </p>
                 </div>
               </div>
+              <button
+                onClick={generatePlan}
+                disabled={loading}
+                className="p-2 rounded-full bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 transition-colors"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+              </button>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                <motion.button
-                  onClick={generatePlan}
-                  disabled={loading}
-                  className="p-1.5 sm:p-2 lg:px-3 lg:py-2 rounded-lg sm:rounded-xl lg:rounded-2xl font-medium transition-all disabled:opacity-50 flex items-center gap-1 sm:gap-2"
-                  style={{
-                    backgroundColor: loading ? "#334155" : "#0D9488",
-                    color: "#E2E8F0",
-                  }}
-                  whileHover={!loading ? { scale: 1.02 } : {}}
-                  whileTap={!loading ? { scale: 0.98 } : {}}
+            {/* Tabs */}
+            <div className="grid grid-cols-4 gap-2 mt-4 px-4 pb-1">
+              {[
+                { id: 'overview', label: 'Overview', icon: Target },
+                { id: 'portfolio', label: 'Portfolio', icon: PieChart },
+                { id: 'steps', label: 'Steps', icon: CheckCircle },
+                { id: 'learn', label: 'Learn', icon: Sparkles },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-1 py-2 rounded-xl text-[10px] md:text-sm font-medium transition-all ${activeTab === tab.id
+                    ? 'bg-teal-500 text-navy-900'
+                    : 'bg-navy-800 text-slate-400 border border-slate-700'
+                    }`}
                 >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4" />
-                  )}
-                  <span className="hidden lg:inline text-sm">
-                    {loading ? "Generating..." : "Generate New"}
-                  </span>
-                </motion.button>
-              </div>
+                  <tab.icon className="w-4 h-4 md:w-4 md:h-4" />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </motion.div>
 
-        <div className="w-full flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-10">
-          <div className="max-w-6xl mx-auto w-full">
+        <div className="flex-1 overflow-y-auto p-4 pb-24">
+          <div className="max-w-3xl mx-auto space-y-6">
             <AnimatePresence mode="wait">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
               >
-                <motion.div
-                  className="text-center mb-10 lg:mb-12"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                >
-                  <div
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-                    style={{ backgroundColor: "#1F2A37", color: "#0D9488" }}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">Plan Ready</span>
-                  </div>
-
-                  <h1
-                    className="text-2xl sm:text-4xl lg:text-5xl mb-4 sm:mb-6"
-                    style={{
-                      color: "#E2E8F0",
-                      fontWeight: "400",
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    Your {generatedPlan.plan_name}
-                  </h1>
-                  <p
-                    className="text-base sm:text-xl max-w-3xl mx-auto"
-                    style={{
-                      color: "#94A3B8",
-                      fontFamily: "'Inter', -apple-system, sans-serif",
-                    }}
-                  >
-                    {generatedPlan.description}
-                  </p>
-                </motion.div>
-
-                {/* Plan Overview */}
-                <motion.div
-                  className="mb-6 lg:mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <TrendingUp className="w-5 h-5 text-green-600" />
-                        <span className="font-medium text-white">Expected Return</span>
-                      </div>
-                      <p className="text-2xl font-bold text-green-600">{generatedPlan.expected_return}</p>
-                    </div>
-
-                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <Target className="w-5 h-5 text-blue-600" />
-                        <span className="font-medium text-white">Risk Level</span>
-                      </div>
-                      <p className="text-2xl font-bold text-blue-600 capitalize">{generatedPlan.risk_level}</p>
-                    </div>
-
-                    <div className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <PieChart className="w-5 h-5 text-teal-400" />
-                        <span className="font-medium text-white">Stocks</span>
-                      </div>
-                      <p className="text-2xl font-bold text-teal-400">{generatedPlan.recommended_stocks.length} stocks</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Recommended Stocks */}
-                <motion.div
-                  className="mb-6 lg:mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <h2 className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6">Recommended Portfolio</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                    {generatedPlan.recommended_stocks.map((stock, index) => (
-                      <div key={index} className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h3 className="font-bold text-lg text-white">{stock.name}</h3>
-                            <p className="text-sm text-slate-400">{stock.symbol}</p>
-                          </div>
-                          <span className="px-3 py-1 bg-navy-900/50 text-teal-400 rounded-full text-sm font-medium">
-                            {stock.allocation}%
-                          </span>
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Plan Summary Card */}
+                    <div className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-2xl p-5 border border-slate-700 shadow-lg">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                          <Crown className="w-6 h-6 text-teal-400" />
                         </div>
-                        <p className="text-sm text-slate-400 mb-3">{stock.sector}</p>
-                        <p className="text-sm text-slate-300">{stock.reasoning}</p>
+                        <div>
+                          <h2 className="text-xl font-bold text-white mb-2">Plan Summary</h2>
+                          <p className="text-slate-300 text-sm leading-relaxed">
+                            {generatedPlan.description}
+                          </p>
+                        </div>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Key Metrics Grid */}
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Key Metrics</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2 bg-navy-800/50 rounded-xl p-4 border border-slate-700/50">
+                          <div className="flex items-center gap-2 mb-2 text-green-400">
+                            <TrendingUp className="w-4 h-4" />
+                            <span className="text-xs font-medium">Return</span>
+                          </div>
+                          <p className="text-lg font-bold text-white leading-tight">{generatedPlan.expected_return}</p>
+                        </div>
+                        <div className="bg-navy-800/50 rounded-xl p-4 border border-slate-700/50">
+                          <div className="flex items-center gap-2 mb-2 text-blue-400">
+                            <Target className="w-4 h-4" />
+                            <span className="text-xs font-medium">Risk</span>
+                          </div>
+                          <p className="text-xl font-bold text-white capitalize">{generatedPlan.risk_level}</p>
+                        </div>
+                        <div className="bg-navy-800/50 rounded-xl p-4 border border-slate-700/50">
+                          <div className="flex items-center gap-2 mb-2 text-teal-400">
+                            <PieChart className="w-4 h-4" />
+                            <span className="text-xs font-medium">Stocks</span>
+                          </div>
+                          <p className="text-xl font-bold text-white">{generatedPlan.recommended_stocks.length}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Strategy Overview */}
+                    <Card className="bg-navy-800/30 border-slate-700/50">
+                      <CardHeader className="p-5 pb-2">
+                        <CardTitle className="text-base text-white">Strategy Overview</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-5 pt-2">
+                        <p className="text-sm text-slate-400 leading-relaxed">{generatedPlan.summary}</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                </motion.div>
+                )}
 
-                {/* Summary */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
-                  <CardHeader>
-                    <CardTitle className="text-white">Investment Strategy Overview</CardTitle>
-                    <CardDescription className="text-slate-400">{generatedPlan.summary}</CardDescription>
-                  </CardHeader>
-                </Card>
+                {activeTab === 'portfolio' && (
+                  <div className="space-y-6">
+                    {/* Asset Allocation */}
+                    <Card className="bg-navy-800/30 border-slate-700/50 overflow-hidden">
+                      <CardHeader className="p-5 border-b border-slate-700/50 bg-navy-800/50">
+                        <CardTitle className="text-base text-white flex items-center gap-2">
+                          <PieChart className="w-4 h-4 text-teal-400" />
+                          Asset Allocation
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-5">
+                        <div className="space-y-4">
+                          {(generatedPlan.allocation || []).map((item: any, index: number) => (
+                            <div key={index} className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="font-medium text-slate-200">{item.assetClass}</span>
+                                <span className="font-bold text-teal-400">{item.percentage}%</span>
+                              </div>
+                              <div className="w-full bg-navy-900 rounded-full h-2">
+                                <div
+                                  className="bg-teal-500 h-2 rounded-full"
+                                  style={{ width: `${item.percentage}%` }}
+                                ></div>
+                              </div>
+                              <p className="text-xs text-slate-500">{item.reasoning}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* Asset Allocation */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
-                      <PieChart className="w-5 h-5 text-teal-400" />
-                      Recommended Asset Allocation
-                    </CardTitle>
-                    <CardDescription className="text-slate-400">
-                      Based on your {formData.riskComfort} risk tolerance and {formData.investmentHorizon} horizon
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        {(generatedPlan.allocation || []).map((item: any, index: number) => (
-                          <div key={index} className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="font-medium text-white">{item.assetClass}</span>
-                              <span className="font-bold text-teal-400">{item.percentage}%</span>
+                    {/* Recommended Stocks */}
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Recommended Stocks</h3>
+                      <div className="space-y-3">
+                        {generatedPlan.recommended_stocks.map((stock, index) => (
+                          <div key={index} className="bg-navy-800/50 rounded-xl p-4 border border-slate-700/50 flex flex-col gap-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-white">{stock.symbol}</h4>
+                                  <span className="px-2 py-0.5 bg-navy-900 text-slate-400 text-[10px] rounded border border-slate-700">
+                                    {stock.sector}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-1">{stock.name}</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-lg font-bold text-teal-400">{stock.allocation}%</span>
+                                <p className="text-[10px] text-slate-500">Allocation</p>
+                              </div>
                             </div>
-                            <div className="w-full bg-navy-900 rounded-full h-2">
-                              <div
-                                className="bg-teal-500 h-2 rounded-full"
-                                style={{ width: `${item.percentage}%` }}
-                              ></div>
+                            <div className="pt-3 border-t border-slate-700/50">
+                              <p className="text-xs text-slate-300 leading-relaxed">{stock.reasoning}</p>
                             </div>
-                            <p className="text-xs text-slate-400">{item.reasoning}</p>
                           </div>
                         ))}
                       </div>
-                      <div className="flex items-center justify-center">
-                        {/* Placeholder for a real chart */}
-                        <div className="w-48 h-48 rounded-full border-8 border-teal-500/20 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-white">100%</div>
-                            <div className="text-xs text-slate-400">Diversified</div>
+                    </div>
+
+                    {/* Suggested Instruments */}
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Other Instruments</h3>
+                      <div className="space-y-3">
+                        {(generatedPlan.suggestions || []).map((suggestion: any, index: number) => (
+                          <div key={index} className="bg-navy-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-medium text-white text-sm">{suggestion.name}</h4>
+                              <span className="px-2 py-0.5 bg-teal-500/10 text-teal-400 text-[10px] rounded-full border border-teal-500/20">
+                                {suggestion.type}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400 mb-3">{suggestion.description}</p>
+                            <div className="flex justify-between text-xs text-slate-500 bg-navy-900/50 p-2 rounded-lg">
+                              <span>Return: <span className="text-teal-400">{suggestion.expectedReturn}</span></span>
+                              <span>Risk: <span className="text-white">{suggestion.riskLevel}</span></span>
+                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                )}
 
-                {/* Suggested Instruments */}
-                <Card className="bg-navy-800/50 border-slate-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
-                      <TrendingUp className="w-5 h-5 text-teal-400" />
-                      Suggested Instruments
-                    </CardTitle>
-                    <CardDescription className="text-slate-400">
-                      Specific investment vehicles to consider
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                {activeTab === 'steps' && (
+                  <div className="space-y-6">
                     <div className="space-y-4">
-                      {(generatedPlan.suggestions || []).map((suggestion: any, index: number) => (
-                        <div key={index} className="p-4 bg-navy-900/50 border border-slate-700/50 rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-white">{suggestion.name}</h3>
-                            <span className="px-2 py-1 bg-teal-500/10 text-teal-400 text-xs rounded-full border border-teal-500/20">
-                              {suggestion.type}
-                            </span>
+                      {generatedPlan.steps.map((step, index) => (
+                        <div key={index} className="relative pl-8 pb-8 last:pb-0">
+                          {/* Timeline Line */}
+                          <div className="absolute left-3 top-8 bottom-0 w-0.5 bg-slate-800 last:hidden"></div>
+
+                          {/* Step Number Bubble */}
+                          <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center text-xs font-bold z-10 shadow-[0_0_10px_rgba(20,184,166,0.3)]">
+                            {step.step_number}
                           </div>
-                          <p className="text-sm text-slate-400 mb-3">{suggestion.description}</p>
-                          <div className="flex justify-between text-xs text-slate-500">
-                            <span>Expected Return: <span className="text-teal-400">{suggestion.expectedReturn}</span></span>
-                            <span>Risk Level: <span className="text-white">{suggestion.riskLevel}</span></span>
+
+                          <div className="bg-navy-800/50 rounded-xl p-4 border border-slate-700/50">
+                            <h3 className="font-bold text-white mb-2">{step.title}</h3>
+                            <p className="text-sm text-slate-300 mb-4">{step.description}</p>
+
+                            <div className="bg-navy-900/50 rounded-lg p-3 mb-3">
+                              <h4 className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Action Items</h4>
+                              <ul className="space-y-2">
+                                {step.actions.map((action, actionIndex) => (
+                                  <li key={actionIndex} className="flex items-start gap-2 text-sm text-slate-300">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 flex-shrink-0"></div>
+                                    {action}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="flex items-center gap-1 text-slate-400">
+                                <Clock className="w-3 h-3" />
+                                {step.timeline}
+                              </span>
+                              <span className="text-green-400 font-medium bg-green-400/10 px-2 py-0.5 rounded">
+                                {step.expected_outcome}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-                {/* Implementation Steps */}
-                <motion.div
-                  className="mb-6 lg:mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  <div className="flex items-center justify-between mb-4 lg:mb-6">
-                    <h2 className="text-xl lg:text-2xl font-bold text-white">Implementation Steps</h2>
-                    <button
-                      onClick={() => setShowDetailedSteps(!showDetailedSteps)}
-                      className="px-4 py-2 text-sm bg-navy-800 hover:bg-navy-700 text-slate-300 rounded-lg transition-colors"
-                    >
-                      {showDetailedSteps ? "Hide Details" : "Show Details"}
-                    </button>
                   </div>
+                )}
 
-                  <div className="space-y-4">
-                    {generatedPlan.steps.map((step, index) => (
-                      <div key={index} className="bg-navy-800/50 rounded-2xl p-4 lg:p-6 shadow-sm border" style={{ borderColor: "#334155" }}>
-                        <div className="flex items-start gap-4">
-                          <div className="w-8 h-8 bg-navy-900 text-teal-400 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                            {step.step_number}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-bold text-lg text-white mb-2">{step.title}</h3>
-                            <p className="text-slate-300 mb-3">{step.description}</p>
-
-                            {showDetailedSteps && (
-                              <>
-                                <div className="mb-3">
-                                  <h4 className="font-medium text-white mb-2">Actions:</h4>
-                                  <ul className="list-disc list-inside text-sm text-slate-400 space-y-1">
-                                    {step.actions.map((action, actionIndex) => (
-                                      <li key={actionIndex}>{action}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-
-                                <div className="flex items-center justify-between text-sm">
-                                  <span className="text-slate-400">
-                                    <Clock className="w-4 h-4 inline mr-1" />
-                                    {step.timeline}
-                                  </span>
-                                  <span className="text-green-600 font-medium">
-                                    {step.expected_outcome}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {activeTab === 'learn' && (
+                  <div className="space-y-6">
+                    <InvestmentBasicsCard riskLevel={formData.riskComfort as 'low' | 'medium' | 'high'} />
+                    <WhereToInvestCard />
+                    <InvestmentDosAndDonts />
                   </div>
-                </motion.div>
-
-                {/* Summary */}
-                <motion.div
-                  className="bg-teal-900/20 rounded-2xl p-4 lg:p-6 border border-teal-800"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-teal-400 mt-1" />
-                    <div>
-                      <h3 className="font-bold text-lg text-teal-200 mb-2">Plan Summary</h3>
-                      <p className="text-teal-300">{generatedPlan.summary}</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Educational Components */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                  className="space-y-6"
-                >
-                  <InvestmentBasicsCard riskLevel={formData.riskComfort as 'low' | 'medium' | 'high'} />
-                  <WhereToInvestCard />
-                  <InvestmentDosAndDonts />
-                </motion.div>
-
-                <motion.div
-                  className="pt-4 sm:pt-6 pb-4 sm:pb-0"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.9 }}
-                >
-                  <motion.button
-                    onClick={onBack}
-                    className="w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 rounded-lg sm:rounded-2xl font-medium transition-all"
-                    style={{
-                      backgroundColor: "#0D9488",
-                      color: "white",
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Back to Dashboard
-                  </motion.button>
-                </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
