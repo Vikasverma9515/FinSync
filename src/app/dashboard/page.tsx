@@ -449,12 +449,17 @@ export default function Dashboard() {
           className="space-y-6"
         >
           <motion.div variants={itemVariants} className="mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              Portfolio
-            </h2>
-            <p className="text-slate-400 text-lg">
-              Risk Score: <span className="text-teal-400 font-semibold">{profile?.risk_score}</span> • <span className="text-teal-400 font-semibold">{profile?.age}</span> years old
-            </p>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <p className="text-slate-400 text-sm mb-1">Welcome back,</p>
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Investor'}
+                </h2>
+                <p className="text-slate-400 text-lg">
+                  Risk Score: <span className="text-teal-400 font-semibold">{profile?.risk_score}</span> • <span className="text-teal-400 font-semibold">{profile?.age}</span> years old
+                </p>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -699,38 +704,60 @@ export default function Dashboard() {
             </h3>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-                <h4 className="text-lg font-semibold text-white mb-6">Asset Allocation</h4>
-                <div className="space-y-4">
-                  {Object.entries(predictData.ai_strategy).map(([asset, allocation]) => (
-                    <div key={asset}>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-slate-300 font-medium">{asset}</p>
-                        <p className="text-teal-400 font-semibold">{(allocation as number * 100).toFixed(1)}%</p>
+              {/* Asset Allocation Card */}
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <h4 className="text-xl font-bold text-white mb-6">Asset Allocation</h4>
+                <div className="space-y-5">
+                  {Object.entries(predictData.ai_strategy).map(([asset, allocation], index) => {
+                    const colors = [
+                      { bg: 'from-teal-500 to-teal-400', text: 'text-teal-400', light: 'bg-teal-500/10' },
+                      { bg: 'from-emerald-500 to-emerald-400', text: 'text-emerald-400', light: 'bg-emerald-500/10' },
+                      { bg: 'from-purple-500 to-purple-400', text: 'text-purple-400', light: 'bg-purple-500/10' },
+                      { bg: 'from-orange-500 to-orange-400', text: 'text-orange-400', light: 'bg-orange-500/10' },
+                    ];
+                    const color = colors[index % colors.length];
+
+                    return (
+                      <div key={asset} className="group">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-white font-semibold text-base">{asset}</p>
+                          <span className={`${color.text} font-bold text-lg`}>
+                            {(allocation as number * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="h-3 bg-navy-700/50 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full bg-gradient-to-r ${color.bg} rounded-full transition-all duration-500 group-hover:shadow-lg`}
+                            style={{ width: `${(allocation as number * 100)}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full"
-                          style={{ width: `${(allocation as number * 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-                <h4 className="text-lg font-semibold text-white mb-6">Recommendations</h4>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+              {/* Recommendations Card */}
+              <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <h4 className="text-xl font-bold text-white mb-6">Recommendations</h4>
+                <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                   {predictData.final_recommendation.map((rec, index) => (
-                    <div key={index} className="p-4 bg-navy-800/50 rounded-lg border border-slate-700/50 hover:bg-navy-800 transition">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-white font-semibold">{rec.Asset}</p>
-                        <span className="text-teal-400 font-bold">{(rec.Allocation * 100).toFixed(1)}%</span>
+                    <div
+                      key={index}
+                      className="p-4 bg-gradient-to-br from-navy-800/80 to-navy-800/40 rounded-xl border border-slate-700/50 hover:border-teal-500/30 hover:shadow-md transition-all duration-300"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-white font-bold text-base">{rec.Asset}</p>
+                        <span className="text-teal-400 font-bold text-lg bg-teal-400/10 px-3 py-1 rounded-full border border-teal-400/30">
+                          {(rec.Allocation * 100).toFixed(1)}%
+                        </span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {rec.Tickers.map((ticker) => (
-                          <span key={ticker} className="text-xs bg-teal-400/10 text-blue-700 px-3 py-1 rounded-full border border-blue-300">
+                          <span
+                            key={ticker}
+                            className="text-xs font-medium bg-teal-400/10 text-teal-400 px-3 py-1.5 rounded-full border border-teal-400/30 hover:bg-teal-400/20 transition-colors cursor-default"
+                          >
                             {ticker}
                           </span>
                         ))}
@@ -741,31 +768,37 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Investor Profile Card */}
             <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-              <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
+              <h4 className="text-xl font-bold text-white mb-6 flex items-center">
                 <Activity className="w-5 h-5 mr-2 text-teal-400" />
                 Investor Profile
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div className="p-4 bg-teal-400/10 rounded-xl border border-teal-400/20">
-                  <p className="text-slate-400 text-xs font-medium mb-2">Age</p>
-                  <p className="text-white font-bold text-2xl">{predictData.user_profile.Age}</p>
+                <div className="p-5 bg-gradient-to-br from-teal-500/10 to-teal-600/5 rounded-xl border border-teal-400/30 hover:shadow-lg hover:shadow-teal-500/10 transition-all">
+                  <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Age</p>
+                  <p className="text-white font-bold text-3xl">{predictData.user_profile.Age}</p>
+                  <p className="text-teal-400 text-xs mt-1">years</p>
                 </div>
-                <div className="p-4 bg-emerald-400/10 rounded-xl border border-emerald-400/20">
-                  <p className="text-slate-400 text-xs font-medium mb-2">Risk Score</p>
-                  <p className="text-white font-bold text-2xl">{predictData.user_profile.RiskScore}</p>
+                <div className="p-5 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl border border-emerald-400/30 hover:shadow-lg hover:shadow-emerald-500/10 transition-all">
+                  <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Risk Score</p>
+                  <p className="text-white font-bold text-3xl">{predictData.user_profile.RiskScore}</p>
+                  <p className="text-emerald-400 text-xs mt-1">out of 10</p>
                 </div>
-                <div className="p-4 bg-purple-400/10 rounded-xl border border-purple-400/20">
-                  <p className="text-slate-400 text-xs font-medium mb-2">Horizon (yr)</p>
-                  <p className="text-white font-bold text-2xl">{predictData.user_profile.InvestmentHorizon}</p>
+                <div className="p-5 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl border border-purple-400/30 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
+                  <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Horizon</p>
+                  <p className="text-white font-bold text-3xl">{predictData.user_profile.InvestmentHorizon}</p>
+                  <p className="text-purple-400 text-xs mt-1">years</p>
                 </div>
-                <div className="p-4 bg-orange-400/10 rounded-xl border border-orange-400/20">
-                  <p className="text-slate-400 text-xs font-medium mb-2">Dependents</p>
-                  <p className="text-white font-bold text-2xl">{predictData.user_profile.Dependents}</p>
+                <div className="p-5 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl border border-orange-400/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
+                  <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Dependents</p>
+                  <p className="text-white font-bold text-3xl">{predictData.user_profile.Dependents}</p>
+                  <p className="text-orange-400 text-xs mt-1">people</p>
                 </div>
-                <div className="p-4 bg-pink-400/10 rounded-xl border border-pink-400/20">
-                  <p className="text-slate-400 text-xs font-medium mb-2">Annual Income</p>
-                  <p className="text-white font-bold text-xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
+                <div className="p-5 bg-gradient-to-br from-pink-500/10 to-pink-600/5 rounded-xl border border-pink-400/30 hover:shadow-lg hover:shadow-pink-500/10 transition-all">
+                  <p className="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wide">Income</p>
+                  <p className="text-white font-bold text-2xl">₹{(predictData.user_profile.AnnualIncome / 1000000).toFixed(1)}M</p>
+                  <p className="text-pink-400 text-xs mt-1">per year</p>
                 </div>
               </div>
             </div>

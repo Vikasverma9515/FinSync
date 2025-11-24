@@ -37,16 +37,17 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+    <div className="space-y-8">
+      {/* Growth Rate Control Section */}
+      <div className="bg-navy-800/30 border border-slate-700/50 rounded-2xl p-6 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h4 className="text-lg font-semibold text-white">Growth Rate Assumption</h4>
+            <h4 className="text-xl font-bold text-white mb-1">Growth Rate Assumption</h4>
             <p className="text-sm text-slate-400">Adjust the annual growth rate to see projections</p>
           </div>
-          <div className="bg-teal-400/10 border-teal-400/20">
-            <p className="text-3xl font-bold text-teal-400">{annualGrowthRate}%</p>
-            <p className="text-xs text-slate-400">per year</p>
+          <div className="text-right">
+            <p className="text-4xl font-bold text-teal-400">{annualGrowthRate}%</p>
+            <p className="text-xs text-slate-400 mt-1">per year</p>
           </div>
         </div>
 
@@ -57,68 +58,112 @@ export function ProjectionCalculator({ holdings }: ProjectionCalculatorProps) {
             max="25"
             value={annualGrowthRate}
             onChange={(e) => setAnnualGrowthRate(Number(e.target.value))}
-            className="flex-1 h-2 bg-gradient-to-r from-teal-500 to-teal-400 rounded-lg appearance-none cursor-pointer accent-teal-500"
+            className="flex-1 h-2 bg-navy-700 rounded-lg appearance-none cursor-pointer accent-teal-400"
+            style={{
+              background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${((annualGrowthRate - 1) / 24) * 100}%, #1e293b ${((annualGrowthRate - 1) / 24) * 100}%, #1e293b 100%)`
+            }}
           />
-          <div className="flex gap-2 text-xs font-medium text-slate-400">
+          <div className="flex gap-3 text-xs font-medium text-slate-500">
             <span>1%</span>
             <span>25%</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-emerald-400/10 border-emerald-400/20 p-5 hover:shadow-md transition">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-slate-300 font-semibold">5-Year Projection</p>
-            <span className="text-xs font-bold bg-emerald-400/20 text-emerald-400 px-3 py-1 rounded-full">2029</span>
+      {/* Projection Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 5-Year Projection */}
+        <div className="group relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-lg font-bold text-white">5-Year Projection</p>
+            <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/30">
+              2029
+            </span>
           </div>
-          <p className="text-3xl font-bold text-emerald-400 mb-2">₹{(projection5 / 100000).toFixed(2)}L</p>
-          <div className="space-y-1">
-            <p className="text-sm text-slate-400">Base: ₹{(totalInvested / 100000).toFixed(2)}L</p>
-            <p className="text-sm font-semibold text-emerald-400">Gain: ₹{(gain5 / 100000).toFixed(2)}L</p>
-          </div>
-        </div>
-
-        <div className="bg-teal-400/10 border-teal-400/20 p-5 hover:shadow-md transition">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-slate-300 font-semibold">10-Year Projection</p>
-            <span className="text-xs font-bold bg-teal-400/20 text-teal-400 px-3 py-1 rounded-full">2034</span>
-          </div>
-          <p className="text-3xl font-bold text-teal-400 mb-2">₹{(projection10 / 100000).toFixed(2)}L</p>
-          <div className="space-y-1">
-            <p className="text-sm text-slate-400">Base: ₹{(totalInvested / 100000).toFixed(2)}L</p>
-            <p className="text-sm font-semibold text-teal-400">Gain: ₹{(gain10 / 100000).toFixed(2)}L</p>
+          <p className="text-4xl font-bold text-emerald-400 mb-4">₹{(projection5 / 100000).toFixed(2)}L</p>
+          <div className="space-y-2 pt-3 border-t border-emerald-500/20">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-slate-400">Base:</p>
+              <p className="text-sm font-medium text-slate-300">₹{(totalInvested / 100000).toFixed(2)}L</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-emerald-400 font-semibold">Gain:</p>
+              <p className="text-sm font-bold text-emerald-400">₹{(gain5 / 100000).toFixed(2)}L</p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-purple-400/10 border-purple-400/20 p-5 hover:shadow-md transition">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-slate-300 font-semibold">15-Year Projection</p>
-            <span className="text-xs font-bold bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full">2039</span>
+        {/* 10-Year Projection */}
+        <div className="group relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 border border-teal-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300 hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-lg font-bold text-white">10-Year Projection</p>
+            <span className="text-xs font-bold bg-teal-500/20 text-teal-400 px-3 py-1.5 rounded-full border border-teal-500/30">
+              2034
+            </span>
           </div>
-          <p className="text-3xl font-bold text-purple-400 mb-2">₹{(projection15 / 100000).toFixed(2)}L</p>
-          <div className="space-y-1">
-            <p className="text-sm text-slate-400">Base: ₹{(totalInvested / 100000).toFixed(2)}L</p>
-            <p className="text-sm font-semibold text-purple-400">Gain: ₹{(gain15 / 100000).toFixed(2)}L</p>
+          <p className="text-4xl font-bold text-teal-400 mb-4">₹{(projection10 / 100000).toFixed(2)}L</p>
+          <div className="space-y-2 pt-3 border-t border-teal-500/20">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-slate-400">Base:</p>
+              <p className="text-sm font-medium text-slate-300">₹{(totalInvested / 100000).toFixed(2)}L</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-teal-400 font-semibold">Gain:</p>
+              <p className="text-sm font-bold text-teal-400">₹{(gain10 / 100000).toFixed(2)}L</p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-orange-400/10 border-orange-400/20 p-5 hover:shadow-md transition">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-slate-300 font-semibold">20-Year Projection</p>
-            <span className="text-xs font-bold bg-orange-400/20 text-orange-400 px-3 py-1 rounded-full">2044</span>
+        {/* 15-Year Projection */}
+        <div className="group relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-lg font-bold text-white">15-Year Projection</p>
+            <span className="text-xs font-bold bg-purple-500/20 text-purple-400 px-3 py-1.5 rounded-full border border-purple-500/30">
+              2039
+            </span>
           </div>
-          <p className="text-3xl font-bold text-orange-400 mb-2">₹{(projection20 / 100000).toFixed(2)}L</p>
-          <div className="space-y-1">
-            <p className="text-sm text-slate-400">Base: ₹{(totalInvested / 100000).toFixed(2)}L</p>
-            <p className="text-sm font-semibold text-orange-400">Gain: ₹{(gain20 / 100000).toFixed(2)}L</p>
+          <p className="text-4xl font-bold text-purple-400 mb-4">₹{(projection15 / 100000).toFixed(2)}L</p>
+          <div className="space-y-2 pt-3 border-t border-purple-500/20">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-slate-400">Base:</p>
+              <p className="text-sm font-medium text-slate-300">₹{(totalInvested / 100000).toFixed(2)}L</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-purple-400 font-semibold">Gain:</p>
+              <p className="text-sm font-bold text-purple-400">₹{(gain15 / 100000).toFixed(2)}L</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 20-Year Projection */}
+        <div className="group relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-lg font-bold text-white">20-Year Projection</p>
+            <span className="text-xs font-bold bg-orange-500/20 text-orange-400 px-3 py-1.5 rounded-full border border-orange-500/30">
+              2044
+            </span>
+          </div>
+          <p className="text-4xl font-bold text-orange-400 mb-4">₹{(projection20 / 100000).toFixed(2)}L</p>
+          <div className="space-y-2 pt-3 border-t border-orange-500/20">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-slate-400">Base:</p>
+              <p className="text-sm font-medium text-slate-300">₹{(totalInvested / 100000).toFixed(2)}L</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-orange-400 font-semibold">Gain:</p>
+              <p className="text-sm font-bold text-orange-400">₹{(gain20 / 100000).toFixed(2)}L</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 p-4 bg-teal-400/10 border-teal-400/20">
-        <p className="text-sm text-slate-300">
-          <span className="font-semibold">ℹ️ Disclaimer:</span> These projections assume a constant {annualGrowthRate}% annual return. Actual market returns vary. Use this for planning purposes only.
+      {/* Disclaimer */}
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 backdrop-blur-sm">
+        <p className="text-sm text-slate-300 flex items-start gap-2">
+          <span className="text-blue-400 text-lg flex-shrink-0">ℹ️</span>
+          <span>
+            <span className="font-semibold text-blue-400">Disclaimer:</span> These projections assume a constant {annualGrowthRate}% annual return. Actual market returns vary. Use this for planning purposes only.
+          </span>
         </p>
       </div>
     </div>

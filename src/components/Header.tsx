@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
   Menu,
@@ -16,6 +17,7 @@ import {
   LogOut,
   Calculator,
 } from 'lucide-react'
+import { RiLineChartLine } from 'react-icons/ri'
 import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -226,11 +228,20 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
             {/* Logo */}
             <motion.button
               onClick={() => router.push('/')}
-              className="flex items-center transition-all duration-200"
+              className="flex items-center gap-3 transition-all duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               aria-label="Go to homepage"
             >
+              <div className=" p-2.5 rounded-full">
+                <Image
+                  src="/logo.svg"
+                  alt="FinSync Logo"
+                  width={28}
+                  height={28}
+                  className="w-15 h-15"
+                />
+              </div>
               <div className="text-2xl font-bold text-white">FinSync</div>
             </motion.button>
 

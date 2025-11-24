@@ -206,17 +206,17 @@ export default function ProfileSetupPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-8 h-8 border-4 border-teal-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-navy-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -225,47 +225,45 @@ export default function ProfileSetupPage() {
           className="text-center mb-12"
         >
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="bg-blue-600 p-2.5 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="bg-teal-400/10 p-2.5 rounded-lg border border-teal-400/30">
+              <TrendingUp className="w-6 h-6 text-teal-400" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-white">
               FinSync
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
-          <p className="text-gray-600">Help us personalize your investment journey</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Complete Your Profile</h1>
+          <p className="text-slate-400">Help us personalize your investment journey</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
+          className="bg-navy-800/50 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-slate-700/50"
         >
           <div className="mb-10">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center">
               {[1, 2, 3].map((num, idx) => (
-                <div key={num} className="flex items-center flex-1">
+                <div key={num} className="flex items-center">
+                  {/* Step Circle and Label */}
                   <div className="flex flex-col items-center">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-all ${
-                      num <= step 
-                        ? 'bg-blue-600 text-white' 
-                        : num < step
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 text-gray-400'
-                    }`}>
-                      {num < step ? <CheckCircle2 className="w-6 h-6" /> : num}
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center font-semibold text-lg transition-all shadow-lg ${num <= step
+                        ? 'bg-teal-400 text-navy-900 shadow-teal-400/30'
+                        : 'bg-navy-700/50 text-slate-500'
+                      }`}>
+                      {num < step ? <CheckCircle2 className="w-7 h-7" /> : num}
                     </div>
-                    <p className={`text-xs mt-2 font-medium ${
-                      num <= step ? 'text-gray-900' : 'text-gray-400'
-                    }`}>
+                    <p className={`text-sm mt-3 font-medium whitespace-nowrap ${num <= step ? 'text-white' : 'text-slate-500'
+                      }`}>
                       {num === 1 ? 'Personal' : num === 2 ? 'Financial' : 'Investment'}
                     </p>
                   </div>
+
+                  {/* Connector Line */}
                   {idx < 2 && (
-                    <div className={`flex-1 h-1 mx-3 rounded-full ${
-                      num < step ? 'bg-green-500' : 'bg-gray-200'
-                    }`} />
+                    <div className={`w-24 sm:w-32 h-1 mx-4 rounded-full transition-all ${num < step ? 'bg-teal-400' : 'bg-navy-700/50'
+                      }`} />
                   )}
                 </div>
               ))}
@@ -273,7 +271,7 @@ export default function ProfileSetupPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm font-medium">
               {error}
             </div>
           )}
@@ -282,7 +280,7 @@ export default function ProfileSetupPage() {
             {step === 1 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     What's your age?
                   </label>
                   <input
@@ -293,13 +291,13 @@ export default function ProfileSetupPage() {
                     required
                     min="18"
                     max="100"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 32"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     How many dependents do you have?
                   </label>
                   <input
@@ -309,7 +307,7 @@ export default function ProfileSetupPage() {
                     onChange={handleChange}
                     required
                     min="0"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 3"
                   />
                 </div>
@@ -319,7 +317,7 @@ export default function ProfileSetupPage() {
             {step === 2 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Annual Income (₹)
                   </label>
                   <input
@@ -330,13 +328,13 @@ export default function ProfileSetupPage() {
                     required
                     min="0"
                     step="100000"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 2000000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Total Net Worth (₹)
                   </label>
                   <input
@@ -347,13 +345,13 @@ export default function ProfileSetupPage() {
                     required
                     min="0"
                     step="100000"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 10000000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Risk Score (0-10)
                   </label>
                   <input
@@ -364,14 +362,14 @@ export default function ProfileSetupPage() {
                     required
                     min="0"
                     max="10"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 7"
                   />
-                  <p className="text-xs text-gray-500 mt-2">0 = Conservative, 10 = Aggressive</p>
+                  <p className="text-xs text-slate-500 mt-2">0 = Conservative, 10 = Aggressive</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Investment Horizon (years)
                   </label>
                   <input
@@ -381,7 +379,7 @@ export default function ProfileSetupPage() {
                     onChange={handleChange}
                     required
                     min="1"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                     placeholder="e.g., 20"
                   />
                 </div>
@@ -391,7 +389,7 @@ export default function ProfileSetupPage() {
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Investment Knowledge
                   </label>
                   <select
@@ -399,7 +397,7 @@ export default function ProfileSetupPage() {
                     value={formData.investmentKnowledge}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all cursor-pointer"
                   >
                     <option value="1">1 - Beginner</option>
                     <option value="2">2 - Basic</option>
@@ -410,7 +408,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Financial Goal
                   </label>
                   <select
@@ -418,7 +416,7 @@ export default function ProfileSetupPage() {
                     value={formData.financialGoal}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all cursor-pointer"
                   >
                     <option value="1">1 - Capital Preservation</option>
                     <option value="2">2 - Steady Growth</option>
@@ -429,7 +427,7 @@ export default function ProfileSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-white mb-3">
                     Financial Condition
                   </label>
                   <select
@@ -437,7 +435,7 @@ export default function ProfileSetupPage() {
                     value={formData.financialCondition}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all cursor-pointer"
+                    className="w-full px-4 py-3 bg-navy-700/50 border border-slate-600/50 rounded-lg text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all cursor-pointer"
                   >
                     <option value="1">1 - Struggling</option>
                     <option value="2">2 - Stable</option>
@@ -447,15 +445,15 @@ export default function ProfileSetupPage() {
                   </select>
                 </div>
 
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <label className="block text-sm font-semibold text-gray-900 mb-4">
+                <div className="border-t border-slate-700/50 pt-6 mt-6">
+                  <label className="block text-sm font-semibold text-white mb-4">
                     Your Portfolio (Optional)
                   </label>
-                  
+
                   <div className="space-y-4 mb-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
-                        <label className="block text-xs text-gray-600 mb-2">Symbol</label>
+                        <label className="block text-xs text-slate-400 mb-2">Symbol</label>
                         <input
                           type="text"
                           name="symbol"
@@ -463,43 +461,43 @@ export default function ProfileSetupPage() {
                           onChange={handlePortfolioChange}
                           placeholder="e.g., RELIANCE"
                           autoComplete="off"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                          className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                         {showSearchResults && currentPortfolioItem.symbol && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-navy-800 border border-slate-600 rounded-lg shadow-xl z-10 max-h-48 overflow-y-auto">
                             {isSearching ? (
-                              <div className="p-3 text-center text-sm text-gray-500">Searching...</div>
+                              <div className="p-3 text-center text-sm text-slate-400">Searching...</div>
                             ) : searchResults.length > 0 ? (
                               searchResults.map((result, idx) => (
                                 <button
                                   key={idx}
                                   type="button"
                                   onClick={() => selectStock(result.symbol, result.name)}
-                                  className="w-full px-3 py-2 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2 text-left hover:bg-navy-700/50 border-b border-slate-700/50 last:border-b-0 transition-colors"
                                 >
-                                  <p className="text-sm font-semibold text-gray-900">{result.symbol}</p>
-                                  <p className="text-xs text-gray-600">{result.name}</p>
+                                  <p className="text-sm font-semibold text-white">{result.symbol}</p>
+                                  <p className="text-xs text-slate-400">{result.name}</p>
                                 </button>
                               ))
                             ) : (
-                              <div className="p-3 text-center text-sm text-gray-500">No stocks found</div>
+                              <div className="p-3 text-center text-sm text-slate-400">No stocks found</div>
                             )}
                           </div>
                         )}
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-2">Company Name</label>
+                        <label className="block text-xs text-slate-400 mb-2">Company Name</label>
                         <input
                           type="text"
                           name="name"
                           value={currentPortfolioItem.name}
                           readOnly
                           placeholder="Auto-filled from search"
-                          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition-all cursor-not-allowed"
+                          className="w-full px-3 py-2 bg-navy-700/30 border border-slate-600/30 rounded-lg text-sm text-slate-400 placeholder-slate-500 focus:outline-none transition-all cursor-not-allowed"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-2">Quantity</label>
+                        <label className="block text-xs text-slate-400 mb-2">Quantity</label>
                         <input
                           type="number"
                           name="quantity"
@@ -507,11 +505,11 @@ export default function ProfileSetupPage() {
                           onChange={handlePortfolioChange}
                           placeholder="e.g., 50"
                           min="1"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                          className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-2">Price (₹)</label>
+                        <label className="block text-xs text-slate-400 mb-2">Price (₹)</label>
                         <input
                           type="number"
                           name="price"
@@ -520,24 +518,24 @@ export default function ProfileSetupPage() {
                           placeholder="e.g., 2850.50"
                           step="0.01"
                           min="0"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                          className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                       </div>
                       <div className="col-span-2">
-                        <label className="block text-xs text-gray-600 mb-2">Purchase Date</label>
+                        <label className="block text-xs text-slate-400 mb-2">Purchase Date</label>
                         <input
                           type="date"
                           name="date"
                           value={currentPortfolioItem.date}
                           onChange={handlePortfolioChange}
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                          className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={addPortfolioItem}
-                      className="w-full px-4 py-2 bg-gray-100 text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                      className="w-full px-4 py-2 bg-navy-700/50 text-white text-sm font-medium rounded-lg hover:bg-navy-600 transition-colors"
                     >
                       Add Stock to Portfolio
                     </button>
@@ -545,17 +543,17 @@ export default function ProfileSetupPage() {
 
                   {portfolio.length > 0 && (
                     <div className="space-y-3">
-                      <p className="text-xs font-medium text-gray-600">Stocks Added ({portfolio.length})</p>
+                      <p className="text-xs font-medium text-slate-400">Stocks Added ({portfolio.length})</p>
                       {portfolio.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div key={index} className="flex items-center justify-between bg-navy-700/30 p-3 rounded-lg border border-slate-600/30">
                           <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900">{item.symbol} - {item.name}</p>
-                            <p className="text-xs text-gray-600">{item.quantity} shares @ ₹{item.price}</p>
+                            <p className="text-sm font-semibold text-white">{item.symbol} - {item.name}</p>
+                            <p className="text-xs text-slate-400">{item.quantity} shares @ ₹{item.price}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => removePortfolioItem(index)}
-                            className="ml-2 px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="ml-2 px-3 py-1 text-xs text-red-400 hover:bg-red-500/10 rounded transition-colors"
                           >
                             Remove
                           </button>
@@ -567,33 +565,33 @@ export default function ProfileSetupPage() {
               </div>
             )}
 
-          <div className="flex gap-3 pt-8 border-t border-gray-200">
-            {step > 1 && (
-              <button
-                type="button"
-                onClick={() => setStep(step - 1)}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Back
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-75 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Setting up...</span>
-                </>
-              ) : step === 3 ? (
-                'Complete Profile'
-              ) : (
-                'Next'
+            <div className="flex gap-3 pt-8 border-t border-slate-700/50">
+              {step > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  className="flex-1 px-6 py-3 border border-slate-600 text-white font-semibold rounded-lg hover:bg-navy-700/50 transition-colors"
+                >
+                  Back
+                </button>
               )}
-            </button>
-          </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 px-6 py-3 bg-teal-400 text-navy-900 font-semibold rounded-lg hover:bg-teal-300 disabled:opacity-75 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-navy-900 border-t-transparent rounded-full animate-spin" />
+                    <span>Setting up...</span>
+                  </>
+                ) : step === 3 ? (
+                  'Complete Profile'
+                ) : (
+                  'Next'
+                )}
+              </button>
+            </div>
           </form>
         </motion.div>
       </div>

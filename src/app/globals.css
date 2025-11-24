@@ -7,17 +7,17 @@
   --bg-deep: #0a192f;
   --bg-darker: #020c1b;
   --bg-card: rgba(17, 34, 64, 0.7);
-  
+
   /* Accents */
   --accent-teal: #64ffda;
   --accent-blue: #112240;
   --accent-highlight: #233554;
-  
+
   /* Text */
   --text-primary: #e6f1ff;
   --text-secondary: #a8b2d1;
   --text-muted: #8892b0;
-  
+
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #0a192f 0%, #112240 100%);
   --gradient-card: linear-gradient(180deg, rgba(17, 34, 64, 0.8) 0%, rgba(10, 25, 47, 0.9) 100%);
@@ -43,11 +43,18 @@ html {
 body {
   background-color: var(--bg-deep);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+/* Better number rendering */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 /* Utilities */
@@ -97,8 +104,15 @@ body {
 
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {

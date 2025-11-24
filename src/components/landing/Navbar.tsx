@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Menu, X, Smartphone } from 'lucide-react';
 
@@ -32,12 +33,18 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400/20 to-blue-500/20 flex items-center justify-center border border-teal-400/20 group-hover:border-teal-400/50 transition-colors">
-                            <Smartphone className="w-5 h-5 text-teal-400" />
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className=" p-2.5 rounded-full">
+                            <Image
+                                src="/logo.svg"
+                                alt="FinSync Logo"
+                                width={28}
+                                height={28}
+                                className="w-15 h-15"
+                            />
                         </div>
                         <span className="text-2xl font-bold text-white tracking-tight">
-                            Fin<span className="text-teal-400">Sync</span>
+                            FinSync
                         </span>
                     </Link>
 
