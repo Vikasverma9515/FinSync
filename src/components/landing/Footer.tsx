@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Smartphone, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
+import Image from 'next/image';
+import { Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -11,9 +12,15 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-2">
-                        <Link href="/" className="flex items-center space-x-2 mb-6">
-                            <div className="w-8 h-8 rounded-lg bg-teal-400/20 flex items-center justify-center border border-teal-400/20">
-                                <Smartphone className="w-4 h-4 text-teal-400" />
+                        <Link href="/" className="flex items-center gap-3 mb-6">
+                            <div className="p-2.5 rounded-full">
+                                <Image
+                                    src="/logo.svg"
+                                    alt="FinSync Logo"
+                                    width={28}
+                                    height={28}
+                                    className="w-15 h-15"
+                                />
                             </div>
                             <span className="text-xl font-bold text-white">
                                 Fin<span className="text-teal-400">Sync</span>

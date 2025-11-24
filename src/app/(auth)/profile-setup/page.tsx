@@ -249,8 +249,8 @@ export default function ProfileSetupPage() {
                   {/* Step Circle and Label */}
                   <div className="flex flex-col items-center">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center font-semibold text-lg transition-all shadow-lg ${num <= step
-                        ? 'bg-teal-400 text-navy-900 shadow-teal-400/30'
-                        : 'bg-navy-700/50 text-slate-500'
+                      ? 'bg-teal-400 text-navy-900 shadow-teal-400/30'
+                      : 'bg-navy-700/50 text-slate-500'
                       }`}>
                       {num < step ? <CheckCircle2 className="w-7 h-7" /> : num}
                     </div>

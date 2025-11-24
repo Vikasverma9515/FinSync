@@ -8,7 +8,10 @@ import { Button } from '@/components/ui/button'
 import {
   TrendingUp, TrendingDown, DollarSign, Search, BarChart3, PieChart, LineChart, Activity, Target
 } from 'lucide-react'
-import { LineChart as RechartsLineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell } from 'recharts'
+import { FaWallet, FaChartPie, FaRobot, FaPiggyBank, FaChartLine, FaCoins } from 'react-icons/fa'
+import { BiLineChart, BiStats } from 'react-icons/bi'
+import { RiStockFill, RiFundsBoxFill } from 'react-icons/ri'
+import { LineChart as RechartsLineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar } from 'recharts'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 import { StockSearchDialog } from '@/components/StockSearchDialog'
@@ -20,6 +23,7 @@ import type { UserProfile, Portfolio } from '@/types'
 import type { StockQuote, PredictResponse } from '@/lib/stocks'
 import Header from '@/components/Header'
 import { DashboardLoader } from '@/components/DashboardLoader'
+import { AIWealthChatbot } from '@/components/AIWealthChatbot'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -452,8 +456,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-slate-400 text-sm mb-1">Welcome back,</p>
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
                   {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Investor'}
+                  <span className="animate-pulse">👋</span>
                 </h2>
                 <p className="text-slate-400 text-lg">
                   Risk Score: <span className="text-teal-400 font-semibold">{profile?.risk_score}</span> • <span className="text-teal-400 font-semibold">{profile?.age}</span> years old
@@ -580,7 +585,10 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-          <h3 className="text-2xl font-bold text-white mb-6">Manage Portfolio</h3>
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <RiFundsBoxFill className="text-teal-400" />
+            Manage Portfolio
+          </h3>
           <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
             <PortfolioUpdater
               holdings={holdings}
@@ -595,12 +603,42 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white">Holdings</h4>
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <FaWallet className="text-teal-400" />
+                  Holdings Distribution
+                </h4>
                 <div className="bg-teal-400/10 p-2 rounded-lg">
                   <Activity className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
+
+              {/* Holdings Pie Chart */}
+              <div className="h-48 mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={holdings.map(h => ({ name: h.symbol, value: h.quantity * (h.current_price || h.average_price) }))}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={60}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {holdings.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(0,0,0,0.1)" />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
+                      formatter={(value: number) => `₹${value.toFixed(0)}`}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+
               <PortfolioManager
                 holdings={holdings}
                 onStockRemoved={reloadPortfolioData}
@@ -632,55 +670,91 @@ export default function Dashboard() {
             </div>
 
             <div className="lg:col-span-2 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <LineChart className="w-5 h-5 mr-2 text-teal-400" />
-                Profit/Loss Summary
+              <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <BiStats className="w-6 h-6 text-teal-400" />
+                Profit/Loss Analysis
               </h4>
+
               {profitLoss ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* P/L Bar Chart */}
                   {(profitLoss.data && Array.isArray(profitLoss.data) && profitLoss.data.length > 0) || (profitLoss.rawData?.data && Array.isArray(profitLoss.rawData.data) && profitLoss.rawData.data.length > 0) ? (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                      <div className="h-64 w-full mb-6">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={profitLoss.data || profitLoss.rawData?.data || []}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                            <XAxis dataKey="symbol" stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 12 }} />
+                            <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 12 }} />
+                            <Tooltip
+                              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                              contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
+                              formatter={(value: number) => [`₹${value.toFixed(0)}`, 'Profit/Loss']}
+                            />
+                            <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
+                              {(profitLoss.data || profitLoss.rawData?.data || []).map((entry: any, index: number) => (
+                                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#14b8a6' : '#f43f5e'} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto custom-scrollbar">
                         {(profitLoss.data?.length > 0 ? profitLoss.data : profitLoss.rawData?.data || [])?.map((stock: any) => {
                           const totalInvested = holdings.find(h => h.symbol === stock.symbol)
                             ? holdings.find(h => h.symbol === stock.symbol)!.quantity * holdings.find(h => h.symbol === stock.symbol)!.average_price
                             : 0
                           const profitPercent = totalInvested > 0 ? (stock.profit / totalInvested) * 100 : 0
                           return (
-                            <div key={stock.symbol} className="p-3 bg-navy-800/50 rounded-lg border border-slate-700/50">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-white font-medium">{stock.symbol}</p>
-                                <p className={`text-sm font-bold ${stock.profit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
-                                  {stock.profit >= 0 ? '+' : ''}₹{Math.abs(stock.profit).toFixed(0)}
+                            <div key={stock.symbol} className="p-3 bg-navy-900/50 rounded-lg border border-slate-700/50 flex items-center justify-between hover:border-teal-500/30 transition-colors">
+                              <div>
+                                <p className="text-white font-medium flex items-center gap-2">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${stock.profit >= 0 ? 'bg-teal-400' : 'bg-rose-400'}`}></span>
+                                  {stock.symbol}
+                                </p>
+                                <p className={`text-xs mt-1 ${profitPercent >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
+                                  {profitPercent >= 0 ? '+' : ''}{profitPercent.toFixed(2)}%
                                 </p>
                               </div>
-                              <p className={`text-xs ${profitPercent >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
-                                {profitPercent >= 0 ? '+' : ''}{profitPercent.toFixed(2)}%
+                              <p className={`text-sm font-bold ${stock.profit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
+                                {stock.profit >= 0 ? '+' : ''}₹{Math.abs(stock.profit).toFixed(0)}
                               </p>
                             </div>
                           )
                         })}
                       </div>
-                      <div className="p-4 bg-teal-400/10 rounded-lg border border-teal-400/20 mt-4">
-                        <p className="text-slate-400 text-sm font-medium">Total Profit/Loss</p>
-                        <div className="flex items-baseline justify-between mt-2">
+
+                      <div className="p-4 bg-gradient-to-r from-teal-500/10 to-teal-600/5 rounded-xl border border-teal-400/20 mt-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-slate-400 text-sm font-medium">Total Net Profit/Loss</p>
+                          <p className="text-xs text-slate-500 mt-1">Realized + Unrealized</p>
+                        </div>
+                        <div className="text-right">
                           <p className={`text-3xl font-bold ${profitLoss.totalProfit >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                             {profitLoss.totalProfit >= 0 ? '+' : ''}₹{Math.abs(profitLoss.totalProfit).toFixed(0)}
                           </p>
-                          <p className={`text-lg font-semibold ${profitLoss.percentage >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
+                          <p className={`text-sm font-semibold ${profitLoss.percentage >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
                             {profitLoss.percentage >= 0 ? '+' : ''}{profitLoss.percentage.toFixed(2)}%
                           </p>
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="text-slate-400 text-sm p-4 bg-slate-50 rounded-lg">
-                      No profit/loss data available
+                    <div className="text-slate-400 text-sm p-8 bg-navy-900/30 rounded-xl border border-dashed border-slate-700 text-center">
+                      <FaChartLine className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+                      <p>No profit/loss data available yet.</p>
+                      <p className="text-xs text-slate-500 mt-1">Add stocks to your portfolio to see analysis.</p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-slate-400 text-sm">Loading profit/loss data...</div>
+                <div className="flex items-center justify-center h-64 text-slate-400 text-sm">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-teal-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                    Loading analysis...
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -706,40 +780,79 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Asset Allocation Card */}
               <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <h4 className="text-xl font-bold text-white mb-6">Asset Allocation</h4>
-                <div className="space-y-5">
-                  {Object.entries(predictData.ai_strategy).map(([asset, allocation], index) => {
-                    const colors = [
-                      { bg: 'from-teal-500 to-teal-400', text: 'text-teal-400', light: 'bg-teal-500/10' },
-                      { bg: 'from-emerald-500 to-emerald-400', text: 'text-emerald-400', light: 'bg-emerald-500/10' },
-                      { bg: 'from-purple-500 to-purple-400', text: 'text-purple-400', light: 'bg-purple-500/10' },
-                      { bg: 'from-orange-500 to-orange-400', text: 'text-orange-400', light: 'bg-orange-500/10' },
-                    ];
-                    const color = colors[index % colors.length];
+                <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <FaChartPie className="text-teal-400" />
+                  Asset Allocation
+                </h4>
 
-                    return (
-                      <div key={asset} className="group">
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="text-white font-semibold text-base">{asset}</p>
-                          <span className={`${color.text} font-bold text-lg`}>
-                            {(allocation as number * 100).toFixed(1)}%
-                          </span>
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {/* Pie Chart */}
+                  <div className="w-full md:w-1/2 h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={Object.entries(predictData.ai_strategy).map(([name, value]) => ({ name, value: (value as number) * 100 }))}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {Object.entries(predictData.ai_strategy).map((entry, index) => {
+                            const colors = ['#14b8a6', '#10b981', '#8b5cf6', '#f97316'];
+                            return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} stroke="rgba(0,0,0,0.1)" />;
+                          })}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
+                          itemStyle={{ color: '#fff' }}
+                        />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Legend / Progress Bars */}
+                  <div className="w-full md:w-1/2 space-y-5">
+                    {Object.entries(predictData.ai_strategy).map(([asset, allocation], index) => {
+                      const colors = [
+                        { bg: 'from-teal-500 to-teal-400', text: 'text-teal-400', light: 'bg-teal-500/10' },
+                        { bg: 'from-emerald-500 to-emerald-400', text: 'text-emerald-400', light: 'bg-emerald-500/10' },
+                        { bg: 'from-purple-500 to-purple-400', text: 'text-purple-400', light: 'bg-purple-500/10' },
+                        { bg: 'from-orange-500 to-orange-400', text: 'text-orange-400', light: 'bg-orange-500/10' },
+                      ];
+                      const color = colors[index % colors.length];
+
+                      return (
+                        <div key={asset} className="group">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-slate-300 font-medium text-sm flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${color.text.replace('text-', 'bg-')}`}></span>
+                              {asset}
+                            </p>
+                            <span className={`${color.text} font-bold text-sm`}>
+                              {(allocation as number * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-navy-700/50 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full bg-gradient-to-r ${color.bg} rounded-full transition-all duration-500 group-hover:shadow-lg`}
+                              style={{ width: `${(allocation as number * 100)}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="h-3 bg-navy-700/50 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full bg-gradient-to-r ${color.bg} rounded-full transition-all duration-500 group-hover:shadow-lg`}
-                            style={{ width: `${(allocation as number * 100)}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
               {/* Recommendations Card */}
               <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <h4 className="text-xl font-bold text-white mb-6">Recommendations</h4>
+                <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <FaRobot className="text-teal-400" />
+                  Recommendations
+                </h4>
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                   {predictData.final_recommendation.map((rec, index) => (
                     <div
@@ -771,7 +884,7 @@ export default function Dashboard() {
             {/* Investor Profile Card */}
             <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
               <h4 className="text-xl font-bold text-white mb-6 flex items-center">
-                <Activity className="w-5 h-5 mr-2 text-teal-400" />
+                <FaPiggyBank className="w-6 h-6 mr-2 text-teal-400" />
                 Investor Profile
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -814,6 +927,9 @@ export default function Dashboard() {
           onStockAdded={reloadPortfolioData}
         />
       )}
+
+      {/* AI Wealth Manager Chatbot */}
+      <AIWealthChatbot />
 
     </div>
   )
