@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     console.log(`Searching for stocks with query: ${query}`)
     const results = await searchStocks(query)
     console.log(`Found ${results.length} stocks for query: ${query}`)
-    
+
     return NextResponse.json(results)
   } catch (error) {
     console.error('Error searching stocks:', error)

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     let credentials = null
     let userId = null
-    
+
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '')
@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
 
     if (credentials) {
       try {
+        console.log(`Attempting to login for stock quote: ${symbol}`)
         const loginResponse = await fetch(
           'https://finance-portfolio-management-apis.onrender.com/api/input/login',
           {
@@ -54,20 +55,23 @@ export async function GET(request: NextRequest) {
         )
 
         if (loginResponse.ok) {
-          const setCookie = loginResponse.headers.get('set-cookie')
-          if (setCookie && userId) {
-            await updateSessionCookies(userId, setCookie)
+          const freshCookies = loginResponse.headers.get('set-cookie')
+          console.log(`Login successful for ${symbol}, got fresh cookies`)
+
+          if (freshCookies && userId) {
+            await updateSessionCookies(userId, freshCookies)
           }
-          
-          console.log(`Re-authenticated with Friend API for ${symbol}`)
-          
+
           const headers: Record<string, string> = {
             'Content-Type': 'application/json',
           }
-          if (credentials.cookies) {
-            headers['Cookie'] = credentials.cookies
+
+          // Use fresh cookies from login response
+          if (freshCookies) {
+            headers['Cookie'] = freshCookies.split(';')[0]
           }
-          
+
+          console.log(`Fetching stock ${symbol} with fresh cookies`)
           const response = await fetch(
             `https://finance-portfolio-management-apis.onrender.com/api/output/stocks/${symbol}`,
             {
@@ -75,11 +79,11 @@ export async function GET(request: NextRequest) {
               headers,
             }
           )
-          
+
           if (response.ok) {
             const data = await response.json()
-            console.log(`Friend API stock response for ${symbol}:`, data)
-            
+            console.log(`Stock response successful for ${symbol}:`, data)
+
             const mappedData = {
               symbol: symbol.toUpperCase(),
               name: data.companyName || data.name || symbol,
@@ -88,7 +92,7 @@ export async function GET(request: NextRequest) {
               changePercent: parseFloat(String(data.changePercent || data.percentageChange || 0)),
               timestamp: new Date().toISOString(),
             }
-            
+
             console.log(`Mapped stock data for ${symbol}:`, mappedData)
             const nextRes = NextResponse.json(mappedData, { status: response.status })
             const cookie = response.headers.get('set-cookie')
@@ -96,20 +100,94 @@ export async function GET(request: NextRequest) {
               nextRes.headers.set('set-cookie', cookie)
             }
             return nextRes
+          } else {
+            console.error(`Stock request failed for ${symbol} even with auth:`, response.status)
           }
+        } else {
+          console.error(`Login failed for ${symbol}:`, loginResponse.status)
         }
       } catch (error) {
         console.error(`Error fetching stock ${symbol} with auth:`, error)
       }
     }
 
+    // Fallback: Use hardcoded credentials for testing if no user credentials found
+    console.log(`Attempting fallback authentication for ${symbol}`)
+
+    let loginResponse = null
+    let attempts = 0
+    const maxAttempts = 3
+
+    while (attempts < maxAttempts) {
+      try {
+        attempts++
+        loginResponse = await fetch(
+          'https://finance-portfolio-management-apis.onrender.com/api/input/login',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: "anshh.pasriccha@gmail.com",
+              password: "12345678"
+            }),
+          }
+        )
+
+        if (loginResponse.ok) {
+          break
+        } else {
+          console.warn(`Fallback auth attempt ${attempts} failed: ${loginResponse.status}`)
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
+        }
+      } catch (e) {
+        console.error(`Fallback auth attempt ${attempts} error:`, e)
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+      }
+    }
+
+    let cookieHeader = ''
+    let token = ''
+
+    if (loginResponse && loginResponse.ok) {
+      const setCookie = loginResponse.headers.get('set-cookie')
+      if (setCookie) {
+        cookieHeader = setCookie
+      }
+
+      try {
+        const loginData = await loginResponse.json()
+        if (loginData.token) {
+          token = loginData.token
+        }
+      } catch (e) {
+        console.error('Failed to parse login response:', e)
+      }
+    } else {
+      console.warn('Fallback authentication failed after retries')
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (cookieHeader) {
+      headers['Cookie'] = cookieHeader
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
     const response = await fetch(
       `https://finance-portfolio-management-apis.onrender.com/api/output/stocks/${symbol}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     )
 
@@ -133,7 +211,7 @@ export async function GET(request: NextRequest) {
       changePercent: parseFloat(String(data.changePercent || data.percentageChange || 0)),
       timestamp: new Date().toISOString(),
     }
-    
+
     console.log(`Mapped stock data for ${symbol}:`, mappedData)
     const nextRes = NextResponse.json(mappedData, { status: response.status })
     const cookie = response.headers.get('set-cookie')

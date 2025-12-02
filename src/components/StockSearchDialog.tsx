@@ -8,6 +8,7 @@ interface StockSearchDialogProps {
   authToken: string
   onClose: () => void
   onStockAdded?: () => void
+  onAddToWatchlist?: (symbol: string) => void
 }
 
 interface StockResult {
@@ -18,7 +19,7 @@ interface StockResult {
   changePercent?: number
 }
 
-export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSearchDialogProps) {
+export function StockSearchDialog({ authToken, onClose, onStockAdded, onAddToWatchlist }: StockSearchDialogProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<StockResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -173,12 +174,27 @@ export function StockSearchDialog({ authToken, onClose, onStockAdded }: StockSea
                 </div>
 
                 {!showBuyForm ? (
-                  <Button
-                    onClick={() => setShowBuyForm(true)}
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-navy-900"
-                  >
-                    Add to Portfolio
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setShowBuyForm(true)}
+                      className="flex-1 bg-teal-500 hover:bg-teal-600 text-navy-900"
+                    >
+                      Add to Portfolio
+                    </Button>
+                    {onAddToWatchlist && (
+                      <Button
+                        onClick={() => {
+                          onAddToWatchlist(selectedStock.symbol)
+                          alert(`Added ${selectedStock.symbol} to watchlist`)
+                          onClose()
+                        }}
+                        variant="outline"
+                        className="flex-1 border-teal-500 text-teal-400 hover:bg-teal-500/10"
+                      >
+                        Add to Watchlist
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <div>

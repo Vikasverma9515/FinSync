@@ -9,9 +9,12 @@ import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 
 export default function ProfileSetupPage() {
-  const { user, loading } = useAuth()
+  const { user, session, loading } = useAuth()
   const router = useRouter()
   const [step, setStep] = useState(1)
+
+  // ... (existing code)
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -107,7 +110,7 @@ export default function ProfileSetupPage() {
     setCurrentPortfolioItem(prev => ({
       ...prev,
       symbol,
-      name
+      name: name === 'Custom Search / Other Stock' ? '' : name
     }))
     setShowSearchResults(false)
     setSearchResults([])
@@ -491,9 +494,9 @@ export default function ProfileSetupPage() {
                           type="text"
                           name="name"
                           value={currentPortfolioItem.name}
-                          readOnly
-                          placeholder="Auto-filled from search"
-                          className="w-full px-3 py-2 bg-navy-700/30 border border-slate-600/30 rounded-lg text-sm text-slate-400 placeholder-slate-500 focus:outline-none transition-all cursor-not-allowed"
+                          onChange={handlePortfolioChange}
+                          placeholder="Company Name"
+                          className="w-full px-3 py-2 bg-navy-700/50 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 focus:outline-none transition-all"
                         />
                       </div>
                       <div>

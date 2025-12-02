@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  TrendingUp, TrendingDown, DollarSign, Search, BarChart3, PieChart, LineChart, Activity, Target
+  TrendingUp, TrendingDown, DollarSign, Search, BarChart3, PieChart, LineChart, Activity, Target, X
 } from 'lucide-react'
 import { FaWallet, FaChartPie, FaRobot, FaPiggyBank, FaChartLine, FaCoins } from 'react-icons/fa'
 import { BiLineChart, BiStats } from 'react-icons/bi'
 import { RiStockFill, RiFundsBoxFill } from 'react-icons/ri'
-import { LineChart as RechartsLineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar } from 'recharts'
+import { LineChart as RechartsLineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar, Legend } from 'recharts'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 import { StockSearchDialog } from '@/components/StockSearchDialog'
@@ -33,10 +33,41 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
 
   const [marketStocks, setMarketStocks] = useState<StockQuote[]>([])
+  const [trackedStocks, setTrackedStocks] = useState<StockQuote[]>([])
   const [customStocks, setCustomStocks] = useState<StockQuote[]>([])
   const [profitLoss, setProfitLoss] = useState<any>(null)
   const [authToken, setAuthToken] = useState<string>('')
   const [predictData, setPredictData] = useState<PredictResponse | null>(null)
+  const [watchlist, setWatchlist] = useState<string[]>([])
+  const [predictRetryCount, setPredictRetryCount] = useState(0)
+
+  // Track if initial data load is complete to prevent reloading on tab switch
+  const hasLoadedData = useRef(false)
+
+  useEffect(() => {
+    // Initialize watchlist from localStorage or default
+    const saved = localStorage.getItem('finsync_watchlist')
+    if (saved) {
+      setWatchlist(JSON.parse(saved))
+    } else {
+      setWatchlist([])
+      localStorage.setItem('finsync_watchlist', JSON.stringify([]))
+    }
+  }, [])
+
+  const addToWatchlist = (symbol: string) => {
+    if (!watchlist.includes(symbol)) {
+      const updated = [...watchlist, symbol]
+      setWatchlist(updated)
+      localStorage.setItem('finsync_watchlist', JSON.stringify(updated))
+    }
+  }
+
+  const removeFromWatchlist = (symbol: string) => {
+    const updated = watchlist.filter(s => s !== symbol)
+    setWatchlist(updated)
+    localStorage.setItem('finsync_watchlist', JSON.stringify(updated))
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -143,24 +174,12 @@ export default function Dashboard() {
       const loadMarketStocks = async (token: string) => {
         try {
           const popularStocks = getPopularStocks()
-          const marketData = await Promise.all(
-            popularStocks.slice(0, 8).map(async (symbol) => {
-              try {
-                const headers: Record<string, string> = {}
-                if (token) {
-                  headers['Authorization'] = `Bearer ${token}`
-                }
-                const response = await fetch(`/api/stocks/quote?symbol=${symbol}`, { headers })
-                if (response.ok) {
-                  return await response.json()
-                }
-                return null
-              } catch {
-                return null
-              }
-            })
-          )
-          setMarketStocks(marketData.filter(Boolean) as StockQuote[])
+          const symbols = popularStocks.join(',')
+          const response = await fetch(`/api/stocks/batch?symbols=${symbols}`)
+          if (response.ok) {
+            const data = await response.json()
+            setMarketStocks(data)
+          }
         } catch (error) {
           console.error('Failed to load market data:', error)
         }
@@ -170,24 +189,15 @@ export default function Dashboard() {
       const loadCustomStocks = async (token: string) => {
         try {
           const portfolioSymbols = holdingsData?.map((h: any) => h.symbol) || ['RELIANCE', 'TCS', 'INFY']
-          const customData = await Promise.all(
-            portfolioSymbols.map(async (symbol) => {
-              try {
-                const headers: Record<string, string> = {}
-                if (token) {
-                  headers['Authorization'] = `Bearer ${token}`
-                }
-                const response = await fetch(`/api/stocks/quote?symbol=${symbol}`, { headers })
-                if (response.ok) {
-                  return await response.json()
-                }
-                return null
-              } catch {
-                return null
-              }
-            })
-          )
-          setCustomStocks(customData.filter(Boolean) as StockQuote[])
+          const uniqueSymbols = Array.from(new Set(portfolioSymbols)) as string[]
+
+          if (uniqueSymbols.length === 0) return
+
+          const response = await fetch(`/api/stocks/batch?symbols=${uniqueSymbols.join(',')}`)
+          if (response.ok) {
+            const data = await response.json()
+            setCustomStocks(data)
+          }
         } catch (error) {
           console.error('Failed to load custom stocks:', error)
         }
@@ -231,59 +241,46 @@ export default function Dashboard() {
       const loadMarketStocks = async (token: string) => {
         try {
           console.log('Loading market stocks...')
-          const popularStocks = getPopularStocks()
-          const marketData = await Promise.all(
-            popularStocks.slice(0, 8).map(async (symbol) => {
-              try {
-                const headers: Record<string, string> = {
-                  'Authorization': `Bearer ${token}`
-                }
-                const response = await fetch(`/api/stocks/quote?symbol=${symbol}`, { headers })
-                if (response.ok) {
-                  return await response.json()
-                }
-                console.warn(`Failed to load ${symbol}: ${response.status}`)
-                return null
-              } catch (error) {
-                console.error(`Error loading ${symbol}:`, error)
-                return null
-              }
-            })
-          )
-          const filtered = marketData.filter(Boolean) as StockQuote[]
-          console.log('Market stocks loaded:', filtered)
-          setMarketStocks(filtered)
+          // Always load popular stocks for Market Trends
+          const symbols = getPopularStocks().slice(0, 8).join(',')
+
+          const headers: Record<string, string> = {}
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+          }
+
+          const response = await fetch(`/api/stocks/batch?symbols=${symbols}`, { headers })
+          if (response.ok) {
+            const data = await response.json()
+            console.log('Market stocks loaded:', data)
+            setMarketStocks(data)
+          }
         } catch (error) {
           console.error('Failed to load market data:', error)
         }
       }
 
+
+
       const loadCustomStocks = async (token: string) => {
         try {
           console.log('Loading custom stocks...')
           const portfolioSymbols = holdings?.map((h: any) => h.symbol) || ['RELIANCE', 'TCS', 'INFY']
-          console.log('Portfolio symbols:', portfolioSymbols)
-          const customData = await Promise.all(
-            portfolioSymbols.map(async (symbol) => {
-              try {
-                const headers: Record<string, string> = {
-                  'Authorization': `Bearer ${token}`
-                }
-                const response = await fetch(`/api/stocks/quote?symbol=${symbol}`, { headers })
-                if (response.ok) {
-                  return await response.json()
-                }
-                console.warn(`Failed to load ${symbol}: ${response.status}`)
-                return null
-              } catch (error) {
-                console.error(`Error loading ${symbol}:`, error)
-                return null
-              }
-            })
-          )
-          const filtered = customData.filter(Boolean) as StockQuote[]
-          console.log('Custom stocks loaded:', filtered)
-          setCustomStocks(filtered)
+          const uniqueSymbols = Array.from(new Set(portfolioSymbols))
+
+          if (uniqueSymbols.length === 0) return
+
+          const headers: Record<string, string> = {}
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+          }
+
+          const response = await fetch(`/api/stocks/batch?symbols=${uniqueSymbols.join(',')}`, { headers })
+          if (response.ok) {
+            const data = await response.json()
+            console.log('Custom stocks loaded:', data)
+            setCustomStocks(data)
+          }
         } catch (error) {
           console.error('Failed to load custom stocks:', error)
         }
@@ -302,8 +299,6 @@ export default function Dashboard() {
             setProfitLoss(data)
           } else {
             console.warn(`Failed to load profit/loss: ${response.status}`)
-            const errorText = await response.text()
-            console.error('Error response:', errorText)
           }
         } catch (error) {
           console.error('Failed to load profit/loss:', error)
@@ -312,11 +307,8 @@ export default function Dashboard() {
 
       const loadPredictData = async (token: string) => {
         try {
-          console.log('Loading predict data...')
-          if (!profile) {
-            console.warn('Profile not available for predict data')
-            return
-          }
+          console.log(`Loading predict data... (attempt ${predictRetryCount + 1})`)
+          if (!profile) return
 
           const userProfileData = {
             Age: profile.age,
@@ -332,23 +324,111 @@ export default function Dashboard() {
 
           const data = await getPredictData(userProfileData, token)
           if (data) {
-            console.log('Predict data:', data)
+            console.log('Predict data loaded successfully:', data)
             setPredictData(data)
+            setPredictRetryCount(0) // Reset retry count on success
+          } else {
+            console.log('Predict data failed, will retry...')
           }
         } catch (error) {
           console.error('Failed to load predict data:', error)
         }
       }
 
-      await loadMarketStocks(authToken)
-      await loadCustomStocks(authToken)
-      await loadProfitLoss(authToken)
-      await loadPredictData(authToken)
+      setIsLoading(true)
+      await Promise.all([
+        loadMarketStocks(authToken),
+        loadCustomStocks(authToken),
+        loadProfitLoss(authToken),
+      ])
       setIsLoading(false)
+
+      // Start predict data loading (non-blocking)
+      loadPredictData(authToken)
+
+      // Mark that we've loaded data to prevent reload on tab switch
+      hasLoadedData.current = true
     }
 
-    loadAuthenticatedData()
+    // Only load data if we haven't loaded it yet or if critical dependencies changed
+    if (!hasLoadedData.current || !authToken) {
+      loadAuthenticatedData()
+    }
   }, [authToken, holdings, profile])
+
+  // Separate effect for prediction retry logic
+  useEffect(() => {
+    if (!authToken || !profile || predictData) return
+
+    const maxRetries = 10
+    if (predictRetryCount >= maxRetries) {
+      console.error('Max retries reached for predict data')
+      return
+    }
+
+    const delay = Math.min(3000 * Math.pow(1.5, predictRetryCount), 10000)
+
+    const timer = setTimeout(async () => {
+      console.log(`Retrying predict data... (attempt ${predictRetryCount + 1}/${maxRetries})`)
+
+      const userProfileData = {
+        Age: profile.age,
+        RiskScore: profile.risk_score,
+        InvestmentHorizon: profile.investment_horizon,
+        FinancialGoal: profile.financial_goal,
+        FinancialCondition: profile.financial_condition,
+        AnnualIncome: profile.annual_income,
+        TotalNetWorth: profile.total_net_worth,
+        Dependents: profile.dependents,
+        InvestmentKnowledge: profile.investment_knowledge
+      }
+
+      const data = await getPredictData(userProfileData, authToken)
+      if (data) {
+        console.log('Predict data loaded successfully on retry:', data)
+        setPredictData(data)
+        setPredictRetryCount(0)
+      } else {
+        setPredictRetryCount(prev => prev + 1)
+      }
+    }, delay)
+
+    return () => clearTimeout(timer)
+  }, [authToken, profile, predictData, predictRetryCount])
+
+  // Separate effect for watchlist to avoid full page reload
+  useEffect(() => {
+    if (!authToken) return
+
+    const loadTrackedStocks = async () => {
+      try {
+        console.log('Loading tracked stocks...', watchlist)
+        if (watchlist.length === 0) {
+          setTrackedStocks([])
+          return
+        }
+
+        const symbols = watchlist.join(',')
+
+        const headers: Record<string, string> = {}
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`
+        }
+
+        const response = await fetch(`/api/stocks/batch?symbols=${symbols}`, { headers })
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Tracked stocks loaded:', data)
+          setTrackedStocks(data)
+        }
+      } catch (error) {
+        console.error('Failed to load tracked stocks:', error)
+      }
+    }
+
+    loadTrackedStocks()
+  }, [authToken, watchlist])
+
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -385,17 +465,17 @@ export default function Dashboard() {
     }
   }
 
-  const totalPortfolioValue = holdings.reduce(
-    (sum, h) => sum + h.quantity * (h.current_price || 0),
-    0
-  )
+  // Calculate total portfolio value using live prices from customStocks
+  const totalPortfolioValue = holdings.reduce((sum, h) => {
+    const liveStock = customStocks.find(cs => cs.symbol === h.symbol)
+    const livePrice = liveStock ? liveStock.price : h.current_price
+    return sum + h.quantity * livePrice
+  }, 0)
 
   const totalCost = holdings.reduce(
     (sum, h) => sum + h.quantity * h.average_price,
     0
   )
-
-
 
   const totalGain = totalPortfolioValue - totalCost
   const totalGainPercent = totalCost > 0 ? (totalGain / totalCost) * 100 : 0
@@ -474,7 +554,7 @@ export default function Dashboard() {
                   <DollarSign className="w-5 h-5 text-teal-400" />
                 </div>
               </div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-3">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-2">
                 ₹{(totalPortfolioValue / 100000).toFixed(2)}L
               </div>
               <div className={`text-sm font-medium flex items-center ${totalGain >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
@@ -519,23 +599,108 @@ export default function Dashboard() {
           <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
             <h3 className="text-white font-semibold mb-6 text-lg flex items-center">
               <LineChart className="w-5 h-5 mr-2 text-teal-400" />
-              Portfolio Performance
+              Portfolio Composition
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#64ffda" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#64ffda" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="day" stroke="rgba(255,255,255,0.3)" />
-                <YAxis stroke="rgba(255,255,255,0.3)" />
-                <Tooltip contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
-                <Area type="monotone" dataKey="value" stroke="#64ffda" fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
+
+            {holdings.length > 0 ? (
+              <div className="space-y-6">
+                {/* Simple 2-Point Growth Chart: Purchase vs Now */}
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={[
+                    // Point 1: When stocks were purchased (invested amount)
+                    (() => {
+                      const dataPoint: any = { period: 'When Bought' }
+                      holdings.forEach(stock => {
+                        dataPoint[stock.symbol] = stock.quantity * stock.average_price
+                      })
+                      return dataPoint
+                    })(),
+                    // Point 2: Current live value (from customStocks live prices)
+                    (() => {
+                      const dataPoint: any = { period: 'Now' }
+                      holdings.forEach(stock => {
+                        // Use live price from customStocks if available
+                        const liveStock = customStocks.find(cs => cs.symbol === stock.symbol)
+                        const livePrice = liveStock ? liveStock.price : stock.current_price
+                        dataPoint[stock.symbol] = stock.quantity * livePrice
+                      })
+                      return dataPoint
+                    })()
+                  ]}>
+                    <defs>
+                      {holdings.map((stock, idx) => (
+                        <linearGradient key={stock.symbol} id={`color${stock.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={COLORS[idx % COLORS.length]} stopOpacity={0.8} />
+                          <stop offset="95%" stopColor={COLORS[idx % COLORS.length]} stopOpacity={0.3} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis
+                      dataKey="period"
+                      stroke="rgba(255,255,255,0.3)"
+                      tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    />
+                    <YAxis
+                      stroke="rgba(255,255,255,0.3)"
+                      tick={{ fontSize: 12, fill: '#94a3b8' }}
+                      tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#0a192f',
+                        border: '1px solid #334155',
+                        borderRadius: '8px',
+                        color: '#fff'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                      formatter={(value: number) => `₹${value.toFixed(0)}`}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}
+                      iconType="circle"
+                    />
+                    {holdings.map((stock, idx) => (
+                      <Area
+                        key={stock.symbol}
+                        type="monotone"
+                        dataKey={stock.symbol}
+                        stackId="1"
+                        stroke={COLORS[idx % COLORS.length]}
+                        fill={`url(#color${stock.symbol})`}
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </AreaChart>
+                </ResponsiveContainer>
+
+                {/* Stock Value Breakdown */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {holdings.map((stock, idx) => {
+                    const stockValue = stock.quantity * stock.current_price
+                    const percentOfPortfolio = (stockValue / totalPortfolioValue) * 100
+
+                    return (
+                      <div key={stock.symbol} className="p-3 bg-navy-900/50 rounded-xl border border-slate-700/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                          ></div>
+                          <span className="text-white font-semibold text-sm">{stock.symbol}</span>
+                        </div>
+                        <p className="text-lg font-bold text-white">₹{(stockValue / 1000).toFixed(1)}k</p>
+                        <p className="text-xs text-slate-400">{percentOfPortfolio.toFixed(1)}% of portfolio</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-400">
+                <p>Add stocks to your portfolio to see composition</p>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -572,11 +737,8 @@ export default function Dashboard() {
                     <TrendingDown className="w-5 h-5 text-rose-400" />
                   )}
                 </div>
-                <div className="mb-3">
+                <div>
                   <p className="text-2xl font-bold text-white">₹{stock.price.toFixed(0)}</p>
-                  <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
-                    {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                  </p>
                 </div>
               </motion.div>
             ))}
@@ -650,23 +812,141 @@ export default function Dashboard() {
                 <TrendingUp className="w-5 h-5 mr-2 text-teal-400" />
                 Live Prices
               </h4>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {customStocks.map((stock) => (
-                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-navy-800/50 rounded-lg border border-slate-700/50 hover:bg-navy-800 transition">
-                    <div>
-                      <p className="text-white font-medium">{stock.symbol}</p>
-                      <p className="text-slate-400 text-sm">{stock.name}</p>
+              {/* Assuming CardContent is a component that wraps the content */}
+              <div className={`space-y-3 ${customStocks.length > 5 ? 'max-h-[500px] overflow-y-auto pr-2' : ''}`}>
+                {customStocks.map((stock) => {
+                  const isPositive = stock.change >= 0
+                  const Icon = isPositive ? TrendingUp : TrendingDown
+
+                  // Find the corresponding holding to get purchase price
+                  const holding = holdings.find((h: any) => h.symbol === stock.symbol)
+                  const purchasePrice = holding?.average_price || stock.price
+                  const currentPrice = stock.price
+                  const priceGain = currentPrice - purchasePrice
+                  const priceGainPercent = ((priceGain / purchasePrice) * 100)
+                  const isProfitable = priceGain >= 0
+
+                  return (
+                    <div key={stock.symbol} className="p-4 bg-gradient-to-br from-navy-900/80 to-navy-900/40 rounded-xl border border-slate-700/50 hover:border-teal-500/30 hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${isPositive ? 'bg-teal-500/10' : 'bg-red-500/10'}`}>
+                            <Icon className={`w-4 h-4 ${isPositive ? 'text-teal-400' : 'text-red-400'}`} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-white text-base">{stock.symbol}</p>
+                            <p className="text-xs text-slate-400">{stock.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-white text-lg">₹{currentPrice.toFixed(2)}</p>
+                        </div>
+                      </div>
+
+                      {/* Purchase vs Current Price Comparison */}
+                      {holding && (
+                        <div className="mb-3 p-3 bg-navy-800/50 rounded-lg border border-slate-700/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-slate-500"></div>
+                              <span className="text-xs text-slate-400">Bought</span>
+                              <span className="text-xs font-semibold text-slate-300">₹{purchasePrice.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${isProfitable ? 'bg-teal-400' : 'bg-red-400'}`}></div>
+                              <span className="text-xs text-slate-400">Current</span>
+                              <span className="text-xs font-semibold text-slate-300">₹{currentPrice.toFixed(2)}</span>
+                            </div>
+                          </div>
+
+                          {/* Mini Bar Chart */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-1 h-2 bg-navy-700/50 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-slate-500 rounded-full"
+                                style={{ width: `${Math.min((purchasePrice / Math.max(purchasePrice, currentPrice)) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                            <div className="flex-1 h-2 bg-navy-700/50 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${isProfitable ? 'bg-teal-500' : 'bg-red-500'}`}
+                                style={{ width: `${Math.min((currentPrice / Math.max(purchasePrice, currentPrice)) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          {/* Gain/Loss Display */}
+                          <div className="text-center">
+                            <span className={`text-xs font-bold ${isProfitable ? 'text-teal-400' : 'text-red-400'}`}>
+                              {isProfitable ? '▲' : '▼'} {isProfitable ? '+' : ''}₹{priceGain.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+
                     </div>
-                    <div className="text-right">
-                      <p className="text-white font-semibold">₹{stock.price.toFixed(0)}</p>
-                      <p className={`text-sm font-medium ${stock.change >= 0 ? 'text-teal-400' : 'text-rose-400'}`}>
-                        {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                      </p>
+                  )
+                })}
+                {customStocks.length === 0 && (
+                  <div className="text-center text-gray-400 py-4">
+                    {holdings.length === 0 ? "No stocks in portfolio" : "Loading live prices..."}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* My Stock Tracker Section */}
+            {/* <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold text-white flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2 text-teal-400" />
+                  My Stock Tracker
+                </h4>
+                <Button
+                  onClick={() => setShowSearch(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-teal-500 text-teal-400 hover:bg-teal-500/10"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Track Stock
+                </Button>
+              </div>
+
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {trackedStocks.map((stock) => (
+                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-navy-900/50 rounded-lg border border-teal-500/10 hover:border-teal-500/30 transition-colors group">
+                    <div>
+                      <p className="font-medium text-white">{stock.symbol}</p>
+                      <p className="text-sm text-gray-400">{stock.name}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="font-medium text-white">₹{stock.price.toFixed(2)}</p>
+                        <p className={`text-sm ${stock.change >= 0 ? 'text-teal-400' : 'text-red-400'}`}>
+                          {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeFromWatchlist(stock.symbol)}
+                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        title="Remove from tracker"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
+                {trackedStocks.length === 0 && (
+                  <div className="text-center py-8 bg-navy-900/30 rounded-xl border border-dashed border-slate-700">
+                    <Search className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">Not tracking any stocks yet.</p>
+                    <p className="text-xs text-slate-500 mt-1">Click "Track Stock" to add to your list.</p>
+                  </div>
+                )}
               </div>
-            </div>
+            </div> */}
 
             <div className="lg:col-span-2 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
@@ -688,6 +968,7 @@ export default function Dashboard() {
                             <Tooltip
                               cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                               contentStyle={{ background: '#0a192f', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
+                              itemStyle={{ color: '#fff' }}
                               formatter={(value: number) => [`₹${value.toFixed(0)}`, 'Profit/Loss']}
                             />
                             <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
@@ -769,13 +1050,13 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {predictData && (
-          <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.7 }}>
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
-              <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
-              AI-Powered Strategy
-            </h3>
+        <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.7 }}>
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
+            <BarChart3 className="w-6 h-6 mr-2 text-teal-400" />
+            AI-Powered Strategy
+          </h3>
 
+          {predictData ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Asset Allocation Card */}
               <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
@@ -879,8 +1160,18 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-8 shadow-sm">
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-16 h-16 border-4 border-teal-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <p className="text-white text-lg font-semibold mb-2">Loading AI Recommendations</p>
+                <p className="text-slate-400 text-sm">Analyzing your portfolio and generating personalized strategy...</p>
+              </div>
+            </div>
+          )}
 
-            {/* Investor Profile Card */}
+          {/* Investor Profile Card */}
+          {predictData && (
             <div className="mt-6 bg-navy-800/50 border border-slate-700/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-sm">
               <h4 className="text-xl font-bold text-white mb-6 flex items-center">
                 <FaPiggyBank className="w-6 h-6 mr-2 text-teal-400" />
@@ -914,8 +1205,8 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
+          )}
+        </motion.div>
 
       </div>
 
@@ -924,6 +1215,7 @@ export default function Dashboard() {
           authToken={authToken}
           onClose={() => setShowSearch(false)}
           onStockAdded={reloadPortfolioData}
+          onAddToWatchlist={addToWatchlist}
         />
       )}
 
